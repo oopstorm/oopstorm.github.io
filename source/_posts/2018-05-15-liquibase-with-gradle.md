@@ -67,6 +67,50 @@ Liquibase 的使用方式可参考官方提供的 [Quick Start](http://www.liqui
 
 ### Change Log 的组织
 
+项目模块化后，Change Log 也需要分布到各个模块中，与官方 [最佳实践](http://www.liquibase.org/bestpractices.html) 给出的结构不同，项目中的结构可能更类似下面的情况：
+
+```
+├── a
+│   └── src
+│       └── main
+│           └── resources
+│               └── liquibase
+│                   └── changelog.xml
+├── b
+│   └── src
+│       └── main
+│           └── resources
+│               └── liquibase
+│                   └── changelogs
+│                       ├── changelog-ddl-b.xml
+│                       └── changelog-dml-b.xml
+└── c
+    └── src
+        └── main
+            └── resources
+                └── liquibase
+                    └── changelogs
+                        └── changelog-dml-c.xml
+```
+
+除 `a` 模块作为 changelog 入口模块外，`b`、`c` 模块可能都是被以 JAR 包方式选择性引入的，即 `a` 模块的 changelog.xml 不应该感知到 `b`、`c` 模块内的 `changelog-*.xml`；同时当引入 `b`、`c` 模块时又能将模块下的 `changelog-*.xml` 都正常加载到。
+
+实现这个需求需借助 Liquibase 提供的 [includeAll](http://www.liquibase.org/documentation/includeall.html)，同时要注意下其中的 `Warnings`：
+
+```
+If you do choose to use the includeAll tag, make sure you have a naming strategy in place that will insure that you will never have conflicts or need to rename files to change to force a reordering.
+```
+
+可参考如下方式组织 changelogs：
+
+* 入口 changelog 为 `liquibase/changelog.xml`
+* 为避免入口 changelog include 到自己，各模块的 changelog 存放路径要与入口 changelog 路径有区别，如放在 `liquibase/changelogs/` 路径下
+* 将 DDL 和 DML 分开放置，且按 `changelog-[ddl/dml]-{module}.xml` 方式命名，因为 Liquibase 是将所有 changelog 文件按字典序方式执行，这样可以保证 DDL 会优先 DML 执行，且不会因路径相同导致 changelog 文件被覆盖
+
+> 注：即使在不同 JAR 包下，相对路径相同的 changelog 文件也会被覆盖
+
+> 如需从 JAR 包中读取 changelog，你可能需要 [PR #767](https://github.com/liquibase/liquibase/pull/767)。
+
 
 
 
