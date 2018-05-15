@@ -2,8 +2,42 @@
 layout: pages
 title: Using Liquibase with Gradle in Spring Project
 date: 2018.05.15
-tags: [Gradle, Spring, Liquibase]
+tags: [Liquibase, Spring, Gradle]
 ---
+
+
+Liquibase 是什么
+---------------
+
+引用 [Liquibase 官网](http://www.liquibase.org/index.html) 的一张图片
+
+![Source Control for Your Database](http://www.liquibase.org/custom_images/home_tagline.png)
+
+类似的工具还有 [Flyway](https://flywaydb.org/)
+
+
+为什么选择 Liquibase
+------------------
+
+[Flyway 官网](https://flywaydb.org/) 上有一个同类工具特性的对比，详见 `Feature Comparison` 部分或下图：
+
+![Feature Comparison](./2018-05-15-liquibase-with-gradle/Feature-Comparison.png)
+
+看图的话，Flyway 完胜，不过 **等等！看完下面内容再做决定**：
+
+* [Liquibase vs Flyway which one to use?](https://stackoverflow.com/questions/37385823/liquibase-vs-flyway-which-one-to-use)
+* [Tool-based Database Refactoring: Flyway vs. Liquibase](https://reflectoring.io/database-refactoring-flyway-vs-liquibase/)
+* [Java世界最棒的DB Migration Tool](http://ju.outofmemory.cn/entry/85903)
+
+一句话总结一下：
+
+```
+面向 SQL，选择 Flyway
+不面向 SQL，选择 Liquibase
+```
+
+
+
 
 版本
 ---
@@ -40,3 +74,4 @@ Change Log Template
 1. [Liquibase](https://github.com/liquibase/liquibase)
 1. [Liquibase Documentation](http://www.liquibase.org/documentation/index.html)
 1. [liquibase-gradle-plugin](https://github.com/liquibase/liquibase-gradle-plugin)
+1. [Why not use HBM2DDL?](https://github.com/liquibase/liquibase-hibernate/wiki#why-not-use-hbm2ddl)
