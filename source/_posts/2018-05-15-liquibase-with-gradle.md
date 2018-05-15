@@ -37,5 +37,6 @@ Change Log Template
 参考资料
 -------
 
-1. [liquibase](https://github.com/liquibase/liquibase)
+1. [Liquibase](https://github.com/liquibase/liquibase)
+1. [Liquibase Documentation](http://www.liquibase.org/documentation/index.html)
 1. [liquibase-gradle-plugin](https://github.com/liquibase/liquibase-gradle-plugin)
