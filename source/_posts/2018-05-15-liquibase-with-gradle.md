@@ -32,7 +32,7 @@ Change Log Template
 1. 修改 build.gradle 中配置的 liquibase.runList，将其值改为 'genDevData'
 1. `./gradlew generateChangelog`
 > 需确保 db/dev-data.xml 不存在，否则会报错
-1. 从 `db/dev-data.xml` 中找到新增数据的 changeSet，并放至相应模块的 changelog 文件中
+1. 从 `db/dev-data.xml` 中找到新增数据的 changeSet，并放至相应模块的 change log 文件中
 
 参考资料
 -------
