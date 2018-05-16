@@ -41,6 +41,15 @@ How to use?
 
 Liquibase 的使用方式可参考官方提供的 [Quick Start](http://www.liquibase.org/quickstart.html) 文档，这里主要讲一下 **Liquibase 和 Spring 集成使用的方式**。
 
+### 版本
+
+先统一一下本文中使用的各类组件的版本：
+
+* [liquibase v3.6.1](https://github.com/liquibase/liquibase/tree/liquibase-parent-3.6.1)
+* [liquibase-gradle-plugin v1.2.4](https://github.com/liquibase/liquibase-gradle-plugin/tree/acf7a693563471f83fd26b9e15365ab98011d804)
+* [Gradle v4.6](https://github.com/gradle/gradle/tree/v4.6.0)
+* [H2 v1.3.176](https://github.com/h2database/h2database/tree/version-1.3/version-1.3.176/h2)
+
 ### 入口 bean
 
 ```
@@ -111,22 +120,21 @@ If you do choose to use the includeAll tag, make sure you have a naming strategy
 
 > 如需从 JAR 包中读取 changelog，你可能需要 [PR #767](https://github.com/liquibase/liquibase/pull/767)。
 
+#### 入口 Change Log
 
+```
+<?xml version="1.0" encoding="UTF-8"?>
 
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+    <includeAll path="classpath*:liquibase/changelogs/" context="dev, production"/>
+</databaseChangeLog>
+```
 
-- [ ] includeAll
-
-
-
-
-版本
----
-
-* [liquibase v3.6.1](https://github.com/liquibase/liquibase/tree/liquibase-parent-3.6.1)
-* [liquibase-gradle-plugin v1.2.4](https://github.com/liquibase/liquibase-gradle-plugin/tree/acf7a693563471f83fd26b9e15365ab98011d804)
-
-Change Log Template
--------------------
+#### Change Log Template
 
 ```
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
@@ -140,13 +148,107 @@ Change Log Template
 </databaseChangeLog>
 ```
 
-### 新增数据
+### 利用 Gradle 执行 Liquibase 命令
+
+如果不是从项目起始时就使用了 Liquibase，或者不想手写 Change Set，可以通过 Liquibase 提供的 [命令](http://www.liquibase.org/documentation/command_line.html) 来生成 Change Log 或 DDL 的变更（数据的变更暂不支持生成）。如果是使用 Gradle 的项目，可以利用 [Liquibase 的 Gradle 插件](https://github.com/liquibase/liquibase-gradle-plugin/tree/acf7a693563471f83fd26b9e15365ab98011d804) 来执行命令，更加便捷。
+
+> Liquibase 项目本身的活跃度目前并不高，插件的活跃度及文档的准确性更是问题重重，这也是本文存在的意义之一。
+
+#### Gradle 配置
+
+以 [H2 数据库](http://h2database.com/html/main.html) 为例，为执行 Liquibase 引入数据库驱动：
+
+```
+buildscript {
+    dependencies {
+        classpath 'com.h2database:h2:1.3.176'
+    }
+}
+```
+
+引入插件：
+
+```
+plugins {
+    id 'org.liquibase.gradle' version '1.2.4'
+}
+```
+
+定义 activities 用以生成不同的 Change Log：
+
+```
+ext {
+    // 数据库地址
+    liquibaseUrl = 'jdbc:h2:~/data/h2/pep_dev;AUTO_SERVER=TRUE;DB_CLOSE_ON_EXIT=FALSE;MVCC=TRUE'
+    // 旧版数据库地址，比较差异用
+    liquibaseOldUrl = 'jdbc:h2:~/data/h2-diff/pep_dev;AUTO_SERVER=TRUE;DB_CLOSE_ON_EXIT=FALSE;MVCC=TRUE'
+    liquibaseUsername = 'sa'
+    liquibasePassword = ''
+}
+
+liquibase {
+    activities {
+        // 生成全库结构 Change Log
+        genDev {
+            changeLogFile 'db/dev.xml'
+            url           liquibaseUrl
+            username      liquibaseUsername
+            password      liquibasePassword
+        }
+        // 生成全库数据 Change Log
+        genDevData {
+            changeLogFile     'db/dev-data.xml'
+            url               liquibaseUrl
+            username          liquibaseUsername
+            password          liquibasePassword
+            diffTypes         'data'
+        }
+        // 对比生成数据库结构变更 Change Log
+        diffDev {
+            changeLogFile     'db/dev-diff.xml'
+            url               liquibaseUrl
+            username          liquibaseUsername
+            password          liquibasePassword
+            referenceUrl      liquibaseOldUrl
+            referenceUsername liquibaseUsername
+            referencePassword liquibasePassword
+        }
+    }
+    // 若不设定 runList，所有 activities 都会被执行
+    // -PrunList=abc 并不好用，所以要执行指定的 activities 时，可直接修改此处值
+    // 多个值可用逗号间隔，如 'genDev,genDevData'
+    runList = 'genDevData'
+}
+```
+
+### 生成 Change Log
+
+#### 全库 Change Log，包括结构和数据
+
+`runList` 设定为 `genDev,genDevData`，执行
+
+`./gradlew generateChangelog`
+
+之后即可在 `./db/dev.xml` 找到全库结构的 Change Log，和 `./db/dev-data.xml` 数据 Change Log。
+
+> 注意：执行命令前需保证这两个文件不存在，否则会报错。
+
+#### 结构变更 Change Log
+
+
+
+
+#### 新增数据
 
 1. 在数据库中执行 insert 语句
 1. 修改 build.gradle 中配置的 liquibase.runList，将其值改为 'genDevData'
 1. `./gradlew generateChangelog`
 > 需确保 db/dev-data.xml 不存在，否则会报错
 1. 从 `db/dev-data.xml` 中找到新增数据的 changeSet，并放至相应模块的 change log 文件中
+
+#### 变更数据
+
+
 
 参考资料
 -------
