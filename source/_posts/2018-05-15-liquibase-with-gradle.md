@@ -225,34 +225,34 @@ liquibase {
 
 #### 全库 Change Log，包括结构和数据
 
-`runList` 设定为 `genDev,genDevData`，执行：
-
-`./gradlew generateChangelog`
-
-之后即可在 `./db/dev.xml` 找到全库结构的 Change Log，和 `./db/dev-data.xml` 数据 Change Log。
+1. `runList` 设定为 `genDev,genDevData`
+1. `./gradlew generateChangelog`
+1. 在 `./db/dev.xml` 可找到全库结构的 Change Log
+1. 在 `./db/dev-data.xml` 可找到全库数据的 Change Log。
 
 > 注意：执行命令前需保证这两个文件不存在，否则会报错。
 
 #### 结构变更 Change Log
 
-欲进行数据库结构变更时，先将变更前的库备份，例如从 `~/data/h2/pep_dev` 备份至 `~/data/h2-diff/pep_dev`，然后将 `runList` 设定为 `diffDev`，之后执行：
-
-`./gradlew diffChangeLog`
-
-结构变更 Change Log 将生成至 `./db/dev-diff.xml`。
+1. 欲进行数据库结构变更时，先将变更前的库备份，例如从 `~/data/h2/pep_dev` 备份至 `~/data/h2-diff/pep_dev`
+1. `runList` 设定为 `diffDev`
+1. `./gradlew diffChangeLog`
+1. 结构变更 Change Log 将生成至 `./db/dev-diff.xml`。
 
 #### 新增数据
 
 1. 在数据库中执行 insert 语句
 1. 修改 build.gradle 中配置的 liquibase.runList，将其值改为 'genDevData'
 1. `./gradlew generateChangelog`
-> 需确保 db/dev-data.xml 不存在，否则会报错
 1. 从 `db/dev-data.xml` 中找到新增数据的 changeSet，并放至相应模块的 change log 文件中
 
 #### 变更数据
 
+Liquibase [目前并不支持数据变更的生成](http://forum.liquibase.org/topic/data-diff-diffchangelog)，可参照官方文档手写 Change Set，语法基本类似 SQL，可参照：
+
 * [Update](http://www.liquibase.org/documentation/changes/update.html)
 * [Delete](http://www.liquibase.org/documentation/changes/delete.html)
+
 
 参考资料
 -------
