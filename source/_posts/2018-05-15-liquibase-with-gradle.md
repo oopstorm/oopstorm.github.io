@@ -225,7 +225,7 @@ liquibase {
 
 #### 全库 Change Log，包括结构和数据
 
-`runList` 设定为 `genDev,genDevData`，执行
+`runList` 设定为 `genDev,genDevData`，执行：
 
 `./gradlew generateChangelog`
 
@@ -235,8 +235,11 @@ liquibase {
 
 #### 结构变更 Change Log
 
+欲进行数据库结构变更时，先将变更前的库备份，例如从 `~/data/h2/pep_dev` 备份至 `~/data/h2-diff/pep_dev`，然后将 `runList` 设定为 `diffDev`，之后执行：
 
+`./gradlew diffChangeLog`
 
+结构变更 Change Log 将生成至 `./db/dev-diff.xml`。
 
 #### 新增数据
 
@@ -248,7 +251,8 @@ liquibase {
 
 #### 变更数据
 
-
+* [Update](http://www.liquibase.org/documentation/changes/update.html)
+* [Delete](http://www.liquibase.org/documentation/changes/delete.html)
 
 参考资料
 -------
