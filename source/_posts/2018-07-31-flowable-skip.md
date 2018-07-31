@@ -1,7 +1,7 @@
 ---
 layout: pages
 title: Flowable SKIP
-date: 2018.07.30
+date: 2018.07.31
 tags: workflow
 ---
 1.skip表达式的作用
