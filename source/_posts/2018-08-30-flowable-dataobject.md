@@ -1,3 +1,9 @@
+---
+layout: pages
+title: Flowable DataObject的使用(flowable自定义流程标题)
+date: 2018.08.30
+tags: workflow
+---
 # 1.DataObject可以做什么
 在流程定义的时候可以设置数据对象，数据对象的名称会成为流程变量的key，flowable还提供了一个扩展属性value来为数据对象赋值。也就是说在流程定义阶段我们就可以在全局定义一些流程变量[（官网解释）](https://www.flowable.org/docs/userguide/index.html#dataobjects)。一个比较简单的使用场景就是自定义流程标题，下面我们将以自定义流程标题为例子，讲解DataObject的使用方式。
 定义方法如下图：
