@@ -3,6 +3,7 @@
     <%- partial('_partial/base-head') %>
     <% if (is_home()) { %>
         <body class="home-body">
+    <% } else if(is_post()){ %>
         <body class="post-body">
     <% } else if(page.layout === "404") { %>
         <body class="four-zero-four-body">
