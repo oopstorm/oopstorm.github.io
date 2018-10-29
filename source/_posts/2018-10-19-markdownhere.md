@@ -1,6 +1,6 @@
 ---
 layout: pages
-title: 如何将简书的markdown格式无痛转成微信需要的富文本格式
+title: 如何将markdown格式无痛转成微信需要的富文本格式
 date: 2018.10.19
 tags: tools
 ---
