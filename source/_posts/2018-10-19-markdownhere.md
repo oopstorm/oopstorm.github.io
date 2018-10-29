@@ -7,9 +7,11 @@ tags: tools
 
 当我们新建微信素材的时候有一些素材是来自于markdown格式，比如我想要在公众号分析一篇简书文章，此时心中无数只草泥马在奔跑，为什么素材库编辑不支持markdown，接下来仅需2步准备工作帮助大家无痛进行转换。
 
-#1.你得有一个chrome浏览器
-#2.安装[markdown-here](https://chrome.google.com/webstore/detail/markdown-here/elifhakcjgalahccnjkneoccemfahfoa)
-#3.准备工作完毕，可以进行转换了
+# 1.你得有一个浏览器
+markdown-here支持Chrome,FireFox,Opera,Safari，请在四个中选择一个你感兴趣的或者你在使用的浏览器
+# 2.安装[markdown-here](https://markdown-here.com/)
+在官网上根据您的浏览器自行下载插件并安装
+# 3.准备工作完毕，可以进行转换了
 
 ①将markdown格式文本粘贴至微信素材库，此时是杂乱的格式，如下图：
 ![image.png](https://upload-images.jianshu.io/upload_images/10783308-c80399c8d5f58d85.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
