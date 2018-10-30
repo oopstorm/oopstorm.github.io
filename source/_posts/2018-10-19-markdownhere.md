@@ -14,12 +14,12 @@ markdown-here支持Chrome,FireFox,Opera,Safari，请在四个中选择一个你�
 # 3.准备工作完毕，可以进行转换了
 
 ①将markdown格式文本粘贴至微信素材库，此时是杂乱的格式，如下图：
-![image.png](https://upload-images.jianshu.io/upload_images/10783308-c80399c8d5f58d85.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![image.png](https://oopstorm.github.io/img/markdownhere/img1.png)
 
 ②点击浏览器右上角markdown-here图标，如下图：
-![image.png](https://upload-images.jianshu.io/upload_images/10783308-75b11367a3fb9a5a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![image.png](https://oopstorm.github.io/img/markdownhere/img2.png)
 
 ③转换后的结果
-![image.png](https://upload-images.jianshu.io/upload_images/10783308-24a0ad4eb3a7444f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![image.png](https://oopstorm.github.io/img/markdownhere/img3.png)
 
 ok，以上就是如何将简书的markdown格式无痛转成微信需要的富文本格式，补充一下如果有在135等辅助编辑网站编辑文章的习惯，那markdown-here依然支持，具体用法与在微信素材库一致
