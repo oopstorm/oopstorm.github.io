@@ -1,11 +1,7 @@
 ---
 layout: pages
 title: Tensorflow：实战Google深度学习框架
-<<<<<<< HEAD
-date: 2018.10.25
-=======
 date: 2018.11.05
->>>>>>> a51cf8f2b713346f1af5a27a74f4f8b61a75a70e
 tags: Tensorflow 深度学习
 ---
 - 深度学习简介
