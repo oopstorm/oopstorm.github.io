@@ -1,7 +1,11 @@
 ---
 layout: pages
 title: Tensorflow：实战Google深度学习框架
+<<<<<<< HEAD
 date: 2018.10.25
+=======
+date: 2018.11.05
+>>>>>>> a51cf8f2b713346f1af5a27a74f4f8b61a75a70e
 tags: Tensorflow 深度学习
 ---
 - 深度学习简介
@@ -48,4 +52,8 @@ mnist 手写体数字识别数据集
 
 # 图像识别与卷积神经网络CNN
 图像数据处理
+<<<<<<< HEAD
 循环神经网络
+=======
+循环神经网络
+>>>>>>> a51cf8f2b713346f1af5a27a74f4f8b61a75a70e
