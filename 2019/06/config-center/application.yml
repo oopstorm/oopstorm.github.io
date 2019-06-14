@@ -6,3 +6,5 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:9091/discovery-service/eureka
+  instance:
+    hostname: ${spring.application.name}
