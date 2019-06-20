@@ -1,0 +1,11 @@
+server:
+  port: 9093
+
+spring:
+  application:
+    name: local
+  cloud:
+    config:
+      uri: http://localhost:8888
+      username: user
+      password: user

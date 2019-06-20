@@ -1,0 +1,16 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: edge
+  cloud:
+    config:
+      uri: http://localhost:8888
+      username: user
+      password: user
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true

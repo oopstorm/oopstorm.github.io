@@ -1,0 +1,24 @@
+rootProject.name = 'cloud'
+
+file("${rootProject.projectDir}/services").eachDir { project ->
+	includeProject(project)
+}
+
+private void includeProject(File project) {
+	File buildFile = new File(settingsDir, separatorConvert("${project.path}${File.separator}${project.name}.gradle"))
+	if (buildFile.isFile()) {
+		include project.name
+		this.findProject(":${project.name}").projectDir = new File(settingsDir, separatorConvert("${project.path}"))
+		this.findProject(":${project.name}").buildFileName = "${project.name}.gradle"
+		return
+	}
+	file(project.path).eachDir { childProject ->
+		includeProject(childProject)
+	}
+}
+
+private String separatorConvert(String path) {
+	path = path.replace("${rootProject.projectDir}", "")
+	path = path.replaceAll("\\${File.separator}", "/")
+	return path.substring(1, path.length())
+}

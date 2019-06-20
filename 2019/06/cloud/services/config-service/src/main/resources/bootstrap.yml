@@ -1,0 +1,37 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: config-service
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/oopstorm/oopstorm.github.io.git
+          default-label: codes
+          search-paths: 2019/06/config-center
+      discovery:
+        enabled: true
+        service-id: config-service
+  rabbitmq:
+    host: 192.168.1.189
+    username: pep_stomp
+    password: 123456
+    port: 5675
+    virtual-host: /
+  security:
+    user:
+      password: ${spring.security.user.name}
+      name: user
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://admin:pwd@peer1:9090/eureka/,http://admin:pwd@peer2:9091/eureka/
+  instance:
+    # Must has hostname or edge service may NPE
+    hostname: localhost
+
+encrypt:
+  key: hinexalphahinex

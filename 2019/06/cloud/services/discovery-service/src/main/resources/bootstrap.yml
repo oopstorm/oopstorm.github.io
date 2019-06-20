@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: discovery-service
+  security:
+    user:
+      name: admin
+      password: pwd
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://admin:pwd@peer1:9090/eureka/,http://admin:pwd@peer2:9091/eureka/
+
+---
+spring:
+  profiles: peer1
+eureka:
+  instance:
+    hostname: peer1
+server:
+  port: 9090
+
+---
+spring:
+  profiles: peer2
+eureka:
+  instance:
+    hostname: peer2
+server:
+  port: 9091
