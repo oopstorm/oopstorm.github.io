@@ -3,7 +3,8 @@ node_js: stable
 
 install:
   - npm install
-
+  - npm audit fix
+  
 script:
   - hexo clean
   - hexo g
