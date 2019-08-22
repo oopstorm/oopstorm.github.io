@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html>
+    <!-- title -->
+
+
+
+
+
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Java 8 in Action · OopStorm</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+        box-shadow: 0 0 3px 0 rgba(0, 0, 0, 0.7);
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s 1;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href="/css/style.css?v=20180311" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="stylesheet" type="text/css" href="/css/mobile.css?v=20180311" media="(max-width: 980px)">
+    <link rel="icon" href="/assets/favicon.ico">
+    <script>
+  // load webfont-loader async, and add callback function
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+  
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntroTags = document.getElementsByClassName('post-intro-tags')[0],
+        postIntroMeat = document.getElementsByClassName('post-intro-meta')[0];
+      if (postIntroTags) {
+        postIntroTags.classList.add('post-fade-in');
+      }
+      if (postIntroMeat) {
+        postIntroMeat.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  async("https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", asyncCb)
+</script>
+    <script>
+        (function (w) {
+            "use strict";
+            // rel=preload support test
+            if (!w.loadCSS) {
+                w.loadCSS = function () { };
+            }
+            // define on the loadCSS obj
+            var rp = loadCSS.relpreload = {};
+            // rel=preload feature support test
+            // runs once and returns a function for compat purposes
+            rp.support = (function () {
+                var ret;
+                try {
+                    ret = w.document.createElement("link").relList.supports("preload");
+                } catch (e) {
+                    ret = false;
+                }
+                return function () {
+                    return ret;
+                };
+            })();
+
+            // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+            // then change that media back to its intended value on load
+            rp.bindMediaToggle = function (link) {
+                // remember existing media attr for ultimate state, or default to 'all'
+                var finalMedia = link.media || "all";
+
+                function enableStylesheet() {
+                    link.media = finalMedia;
+                }
+
+                // bind load handlers to enable media
+                if (link.addEventListener) {
+                    link.addEventListener("load", enableStylesheet);
+                } else if (link.attachEvent) {
+                    link.attachEvent("onload", enableStylesheet);
+                }
+
+                // Set rel and non-applicable media type to start an async request
+                // note: timeout allows this to happen async to let rendering continue in IE
+                setTimeout(function () {
+                    link.rel = "stylesheet";
+                    link.media = "only x";
+                });
+                // also enable media after 3 seconds,
+                // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+                setTimeout(enableStylesheet, 3000);
+            };
+
+            // loop through link elements in DOM
+            rp.poly = function () {
+                // double check this to prevent external calls from running
+                if (rp.support()) {
+                    return;
+                }
+                var links = w.document.getElementsByTagName("link");
+                for (var i = 0; i < links.length; i++) {
+                    var link = links[i];
+                    // qualify links to those with rel=preload and as=style attrs
+                    if (link.rel === "preload" && link.getAttribute("as") === "style" && !link.getAttribute("data-loadcss")) {
+                        // prevent rerunning on link
+                        link.setAttribute("data-loadcss", true);
+                        // bind listeners to toggle media back
+                        rp.bindMediaToggle(link);
+                    }
+                }
+            };
+
+            // if unsupported, run the polyfill
+            if (!rp.support()) {
+                // run once at least
+                rp.poly();
+
+                // rerun poly on an interval until onload
+                var run = w.setInterval(rp.poly, 500);
+                if (w.addEventListener) {
+                    w.addEventListener("load", function () {
+                        rp.poly();
+                        w.clearInterval(run);
+                    });
+                } else if (w.attachEvent) {
+                    w.attachEvent("onload", function () {
+                        rp.poly();
+                        w.clearInterval(run);
+                    });
+                }
+            }
+            // commonjs
+            if (typeof exports !== "undefined") {
+                exports.loadCSS = loadCSS;
+            }
+            else {
+                w.loadCSS = loadCSS;
+            }
+        }(typeof global !== "undefined" ? global : this));
+    </script>
+    <script src="//cdn.staticfile.org/jquery/3.2.1/jquery.min.js" defer></script>
+    <script src="/scripts/main.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+</head>
+
+    
+        <body class="post-body">
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/" >OopStorm</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">Java 8 in Action</a>
+            </div>
+    </div>
+    
+    <a class="home-link" href=/>OopStorm</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style=
+
+
+
+
+
+
+
+
+height:50vh;
+
+>
+    
+    <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
+            
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg.jpg)"></div>
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+            Java 8 in Action
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+            
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+            <!-- 文章页标签  -->
+            
+                <div class= post-intro-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = bookworms>bookworms</a>
+    
+</div>
+            
+            <div class="post-intro-meta">
+                <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                <span class="post-intro-time">2018/07/29</span>
+                
+                <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                    <span class="iconfont-archer">&#xe602;</span>
+                    <span id="busuanzi_value_page_pv"></span>
+                </span>
+                
+                <span class="shareWrapper">
+                    <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                    <span class="shareText">Share</span>
+                    <ul class="shareList">
+                        <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                            <div class="share-qrcode"></div>
+                        </li>
+                        <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                        <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                        <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                        <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                    </ul>
+                </span>
+            </div>
+        
+    </div>
+</div>
+        <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+
+        <div class="container container-unloaded">
+            <main class="main post-page">
+    <article class="article-entry">
+        <h3 id="Java-8-in-Action-8-5"><a href="#Java-8-in-Action-8-5" class="headerlink" title="Java 8 in Action | 8.5"></a>Java 8 in Action | <a href="https://book.douban.com/subject/25912747/" target="_blank" rel="noopener">8.5</a></h3><p>本书全面介绍了Java 8 这个里程碑版本的新特性，包括Lambdas、流和函数式编程。有了函数式的编程特性，可以让代码更简洁，同时也能自动化地利用多核硬件</p>
+<ul>
+<li><p>Multicore CPUs have separate caches (fast memory) attached to each processor core. Locking requires these to be synchronized, requiring relatively slow cache-coherency-protocol intercore communication.</p>
+</li>
+<li><p>Keep in mind the idea of language ecosystem and the consequent evolve-or-wither pressure on languages. Although Java may be supremely healthy at the moment, you can recall other healthy languages such as COBOL that failed to evolve.</p>
+</li>
+<li><p>Multicore processors aren’t fully served by existing Java programming practice.</p>
+</li>
+<li><p>This is what <strong>behavior parameterization</strong> means: the ability to tell a method to take multiple behaviors (or strategies) as parameters and use them internally to accomplish different behaviors</p>
+</li>
+<li><p>An interface is still a <strong>functional interface</strong> if it has many default methods as long as it specifies only one abstract method.</p>
+</li>
+<li><p>What can you do with functional interfaces? Lambda expressions let you provide the implementation of the abstract method of a functional interface directly inline and treat the whole expression as an instance of a functional interface (more technically speaking, an instance of a concrete implementation of the functional interface). You can achieve the same thing with an anonymous inner class, although it’s clumsier: you provide an implementation and instantiate it directly inline.</p>
+</li>
+<li><p>Note that the <strong>@FunctionalInterface</strong> annotation isn’t mandatory, but it’s good practice to use it when an interface is designed for that purpose. You can think of it like the @Override notation to indicate that a method is overridden.</p>
+</li>
+<li><p>using an <strong>IntPredicate</strong> <strong>avoids a boxing operation</strong> of the value 1000, whereas using a <strong>Predicate<integer></integer></strong> would box the argument 1000 to an Integer object:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">public interface IntPredicat &#123;</span><br><span class="line">   boolean test(int t);</span><br><span class="line">&#125;</span><br><span class="line">IntPredicate evenNumbers = (int i) -&gt; i % 2 == 0;</span><br><span class="line">evenNumbers.test(1000); // true (no boxing)</span><br><span class="line"></span><br><span class="line">Predicate&lt;Integer&gt; oddNumbers = (Integer i) -&gt; i % 2 == 1;</span><br><span class="line">oddNumbers.test(1000); // false (boxing)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>In general, the names of functional interfaces that have a specialization for the input type parameter are preceded by the appropriate primitive type, for example, DoublePredicate, IntConsumer, LongBinaryOperator, IntFunction, and so on. <strong>The Function interface has also variants for the output type parameter: ToIntFunction<t>, IntTo-DoubleFunction, and so on</t></strong>.</p>
+<ul>
+<li><p>Note that <strong>none of the functional interfaces allow for a checked exception to be thrown</strong>. You have <strong>two options</strong> if you need a lambda expression to throw an exception: define your own functional interface that declares the checked exception, or wrap the lambda with a try/catch block.</p>
+</li>
+<li><p>If a lambda has a statement expression as its body, it’s compatible with a function descriptor that returns void (provided the parameter list is compatible too). For example, both of the following lines are legal even though the method add of a List returns a boolean and not void as expected in the Consumer context (T -&gt; void):</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">// Predicate has a boolean return</span><br><span class="line">Predicate&lt;String&gt; p = s -&gt; list.add(s);</span><br><span class="line">// Consumer has a void return</span><br><span class="line">Consumer&lt;String&gt; b = s -&gt; list.add(s);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Lambdas are allowed to capture (that is, to reference in their bodies) instance variables and static variables without restrictions. But local variables have to be explicitly declared final or are effectively final.</p>
+</li>
+<li><p>You may be asking yourself <strong>why local variables have these restrictions</strong>. <strong>First</strong>, there’s a key difference in how instance and local variables are implemented behind the scenes. If a lambda could access the local variable directly and the lambda were used in a thread, then the thread using the lambda could try to access the variable after the thread that allocated the variable had deallocated it. Hence, Java implements access to a free local variable as access to a copy of it rather than access to the original variable. This makes no difference if the local variable is assigned to only once—hence the restriction. <strong>Second</strong>, this restriction also discourages typical imperative programming patterns (which, as we explain in later chapters, prevent easy parallelization) that mutate an outer variable.</p>
+</li>
+<li><p>a <strong>closure</strong> is an instance of a function that can reference nonlocal variables of that function with no restrictions</p>
+</li>
+<li><p>Now Java 8 lambdas and anonymous classes do something similar to closures: they can be passed as argument to methods and can access variables outside their scope. But they have a restriction: they can’t modify the content of local variables of a method in which the lambda is defined. Those variables have to be implicitly final.</p>
+</li>
+<li><p>Note that the precedence of methods and and or is managed from left to right using their positions in the chain. So <strong>a.or(b).and(c) can be seen as (a || b) &amp;&amp; c</strong>.</p>
+</li>
+<li><p>To exploit a multicore architecture and execute this code in parallel, you need only change stream() to <strong>parallelStream()</strong></p>
+</li>
+<li><p>the internal iteration in the Streams library can automatically choose a data representation and implementation of parallelism to match your hardware.</p>
+</li>
+<li><p>When to use <strong>findFirst</strong> and <strong>findAny</strong><br>You may wonder why we have both findFirst and findAny. The answer is parallelism. Finding the first element is more constraining in parallel. If you don’t care about which element is returned, use findAny because it’s less constraining when using parallel streams.</p>
+</li>
+<li><p>Note that in the previous example, there are no guarantees about what type of Set is returned. But by using <strong>toCollection</strong>, you can have more control. For example, you can ask for a HashSet by passing a constructor reference to it:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Map&lt;Dish.Type, Set&lt;CaloricLevel&gt;&gt; caloricLevelsByType =</span><br><span class="line">menu.stream().collect(</span><br><span class="line">  groupingBy(Dish::getType, mapping(</span><br><span class="line">   dish -&gt; &#123; if (dish.getCalories() &lt;= 400) return CaloricLevel.DIET;</span><br><span class="line">           else if (dish.getCalories() &lt;= 700) return CaloricLevel.NORMAL;</span><br><span class="line">         else return CaloricLevel.FAT; &#125;,</span><br><span class="line">   toCollection(HashSet::new) )));</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>For example, you could do something like the following:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">stream.parallel()</span><br><span class="line">     .filter(...)</span><br><span class="line">     .sequential()</span><br><span class="line">     .map(...)</span><br><span class="line">     .parallel()</span><br><span class="line">     .reduce();</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>But <strong>the last call to parallel or sequential wins and affects the pipeline globally</strong>. In this example, the pipeline will be executed in parallel because that’s the <strong>last call</strong> in the pipeline.</p>
+<ul>
+<li><p>Parallel streams internally use the default ForkJoinPool (you’ll learn more about the fork/join framework in section 7.2), which <strong>by default has as many threads as you have processors</strong>, as returned by Runtime.getRuntime().availableProcessors().</p>
+</li>
+<li><p>But you can change the size of this pool using the system property java.util.concurrent.ForkJoinPool.common.parallelism, as in the following example:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">System.setProperty(&quot;java.util.concurrent.ForkJoinPool.common.parallelism&quot;, &quot;12&quot;);</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>This is a <strong>global setting</strong>, so it will affect all the parallel streams in your code.</p>
+<ul>
+<li>This is quite disappointing: the parallel version of the summing method is much slower than the sequential one. How can you explain this unexpected result? There are actually two issues mixed together:</li>
+</ul>
+<ol>
+<li>iterate generates boxed objects, which have to be unboxed to numbers before they can be added.</li>
+<li>iterate is difficult to divide into independent chunks to execute in parallel.</li>
+</ol>
+<ul>
+<li><p>This demonstrates how parallel programming can be tricky and sometimes counterintuitive. When misused (for example, using an operation that’s not parallel-friendly, like iterate) it can actually worsen the overall performance of your programs, so it’s mandatory to understand what happens behind the scenes when you invoke that apparently magic parallel method.</p>
+</li>
+<li><p>This also demonstrates that <strong>using the right data structure</strong> and then making it work in parallel guarantees the best performance.</p>
+</li>
+<li><p>Watch out for boxing. <strong>Automatic boxing and unboxing operations can dramatically hurt performance</strong>. Java 8 includes primitive streams (IntStream, LongStream, and DoubleStream) to avoid such operations, so use them when possible.</p>
+</li>
+<li><p>operations such as <strong>limit</strong> and <strong>findFirst</strong> that rely on the <strong>order</strong> of the elements are <strong>expensive in a parallel stream</strong>.</p>
+</li>
+<li><p>Note that in a real-world application, it doesn’t make sense to use more than one <strong>ForkJoinPool</strong>. For this reason, what you typically should do is instantiate it only once and keep this instance in a static field, making it a <strong>singleton</strong>, so it could be conveniently reused by any part of your software.</p>
+</li>
+<li><p>Note that the availableProcessors method, despite its name, in reality returns the number of available cores, including any virtual ones due to hyperthreading.</p>
+</li>
+<li><p>The work-stealing algorithm used by the fork/join framework<br><img src="https://user-images.githubusercontent.com/968283/44899423-545bb100-ad34-11e8-9c20-8f74f1085e2a.png" alt></p>
+</li>
+<li><p>First, the meanings of <strong>this</strong> and <strong>super</strong> are different for anonymous classes and lambda expressions. Inside an anonymous class, this refers to the anonymous class itself, but inside a lambda it refers to the enclosing class. Second, anonymous classes are allowed to shadow variables from the enclosing class. Lambda expressions can’t (they’ll cause a compile error)</p>
+</li>
+<li><p>You can solve the ambiguity by providing an explicit cast (Task):</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">doSomething((Task)() -&gt; System.out.println(&quot;Danger danger!!&quot;));</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>built-in Java Logger class:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">if (logger.isLoggable(Log.FINER))&#123;</span><br><span class="line">   logger.finer(&quot;Problem: &quot; + generateDiagnostic());</span><br><span class="line">&#125;</span><br><span class="line">logger.log(Level.FINER, &quot;Problem: &quot; + generateDiagnostic());</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>This is where lambda expressions can help. What you need is a way to <strong>defer</strong> the construction of the message so it can be generated only under a given condition (here, when the logger level is set to FINER).<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">logger.log(Level.FINER, () -&gt; &quot;Problem: &quot; + generateDiagnostic());</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li><p>What’s the takeaway from the story? If you see yourself querying the state of an object many times in client code (for example, the state of the logger), only to call some method on this object with arguments (for example, log a message), then consider introducing a new method that calls that method (passed as a lambda or method reference) only after internally checking the state of the object. Your code will be more readable (less clutter) and better encapsulated (the state of the object isn’t exposed in client code)!</p>
+</li>
+<li><p>Note that if a method reference refers to a method declared in the same class as where it’s used, then it will appear in the stack trace. For instance, in the following example</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">import java.util.*;</span><br><span class="line"></span><br><span class="line">public class Debugging&#123;</span><br><span class="line">   public static void main(String[] args) &#123;</span><br><span class="line">       List&lt;Integer&gt; numbers = Arrays.asList(1, 2, 3);</span><br><span class="line">       numbers.stream().map(Debugging::divideByZero).forEach(System</span><br><span class="line">            .out::println);</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   public static int divideByZero(int n)&#123;</span><br><span class="line">       return n / 0;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>In the following code, you use peek to print the intermediate value before and after each operation in the stream pipeline:<br><img src="https://user-images.githubusercontent.com/968283/44899442-5f164600-ad34-11e8-8bac-1d0e8c1014d3.png" alt><br>This will produce a useful output at each step of the pipeline:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">from stream: 2</span><br><span class="line">after map: 19</span><br><span class="line">from stream: 3</span><br><span class="line">after map: 20</span><br><span class="line">after filter: 20</span><br><span class="line">after limit: 20</span><br><span class="line">from stream: 4</span><br><span class="line">after map: 21</span><br><span class="line">from stream: 5</span><br><span class="line">after map: 22</span><br><span class="line">after filter: 22</span><br><span class="line">after limit: 22</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Static methods and interfaces<br>A common pattern in Java is to define both an interface and a utility companion class defining many static methods for working with instances of the interface. For example, Collections is a companion class to deal with Collection objects. Now that static methods can exist inside interfaces, such utility classes in your code can go away and their static methods can be moved inside an interface. These companion classes will remain in the Java API in order to preserve backward compatibility.</p>
+</li>
+<li><p>Abstract classes vs. interfaces in Java 8<br>So what’s the difference between an abstract class and an interface? They both can contain abstract methods and methods with a body.</p>
+</li>
+</ul>
+<p><strong>First</strong>, a class can extend only from one abstract class, but a class can implement multiple interfaces.</p>
+<p><strong>Second</strong>, an abstract class can enforce a common state through instance variables (fields). An interface can’t have instance variables.</p>
+<ul>
+<li><strong>Three resolution rules to know</strong><br>There are three rules to follow when a class inherits a method with the same signature from multiple places (such as another class or interface):</li>
+</ul>
+<ol>
+<li>Classes always win. A method declaration in the class or a superclass takes priority over any default method declaration.</li>
+<li>Otherwise, sub-interfaces win: the method with the same signature in the most specific default-providing interface is selected. (If B extends A, B is more specific than A)</li>
+<li>Finally, if the choice is still ambiguous, the class inheriting from multiple interfaces has to explicitly select which default method implementation to use by overriding it and calling the desired method explicitly.</li>
+</ol>
+<ul>
+<li><p>Java 8 introduces the new syntax <strong>X.super.m(…)</strong> where X is the superinterface whose method m you want to call. For example, if you want C to use the default method from B, it looks like this:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">public class C implements B, A &#123;</span><br><span class="line">   void hello() &#123;</span><br><span class="line">       B.super.hello(); // Explicityly choosing to call the method from interface B</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>Because the Optional class wasn’t intended for use as a field type, it also doesn’t implement the Serializable interface</strong>. For this reason, using Optionals in your domain model could break applications using tools or frameworks that require a serializable model to work. Nevertheless, we believe that we showed why using Optionals as a proper type in your domain is a good idea, especially when you have to traverse a graph of objects that could be, all or in part, potentially not present. Alternatively, if you need to have a serializable domain model, we suggest you at least provide a method allowing access also to any possibly missing value as an optional, as in the following example:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">public class Person &#123;</span><br><span class="line">   private Car car;</span><br><span class="line">   public Optional&lt;Car&gt; getCarAsOptional() &#123;</span><br><span class="line">       return Optional.ofNullable(car);</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>you can think of an optional as a stream containing at most a single element</p>
+</li>
+<li><p>Optional.<strong>of</strong>: Returns an Optional wrapping the given value or throws a NullPointerException if this value is null</p>
+</li>
+<li><p>Note that, like streams, optionals also have primitive counterparts—<strong>OptionalInt, OptionalLong, and OptionalDouble</strong>—so the method in listing 10.6 could have returned an OptionalInt instead of Optional<integer></integer></p>
+</li>
+<li><p>We <strong>discourage</strong> using primitive optionals because they lack the map, flatMap, and filter methods</p>
+</li>
+<li><p>it can invoke get on the Future. By doing so the client either unwraps the value contained in the Future (if the asynchronous task is already finished) or remains blocked until that value is available.</p>
+</li>
+<li><p>It’s a good practice to always use a <strong>timeout</strong> to avoid similar situations elsewhere in your code</p>
+</li>
+<li><p>To make the client aware of the reason the shop wasn’t able to provide the price of the requested product, you have to propagate the Exception that caused the problem inside the CompletableFuture through its <strong>completeExceptionally</strong> method.<br><img src="https://user-images.githubusercontent.com/968283/44899460-689fae00-ad34-11e8-8df2-6fa8be1b76e2.png" alt></p>
+</li>
+<li><p>the right pool size to approximate a desired CPU utilization rate can be calculated with the following formula:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Nthreads = NCPU * UCPU * (1 + W/C)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>where</p>
+<p>NCPU is the number of cores, available through Runtime.getRuntime().availableProcessors()<br>UCPU is the target CPU utilization (between 0 and 1), and<br>W/C is the ratio of wait time to compute time</p>
+<ul>
+<li><p>A Java program can’t terminate or exit while a normal thread is executing, so a leftover thread waiting for a never-satisfiable event causes problems. By contrast, marking a thread as a <strong>daemon</strong> means it can be killed on program termination.</p>
+</li>
+<li><p>You’ve now seen <strong>two different ways to do parallel computing on a collection</strong>: either convert it to a parallel stream and use operations like map on it, or iterate over the collection and spawn operations within a CompletableFuture. The latter provides more control using resizing of thread pools, which helps ensure that your overall computation doesn’t block just because all of your fixed number of threads are waiting for I/O.</p>
+</li>
+<li><p>Our advice for using these APIs is as follows:</p>
+</li>
+</ul>
+<ol>
+<li>If you’re doing computation-heavy operations with no I/O, then the Stream interface gives the simplest implementation and one likely to be the most efficient (if all threads are compute-bound, then there’s no point in having more threads than processor cores).</li>
+<li>On the other hand, if your parallel units of work involve waiting for I/O (including network connections), then CompletableFutures give more flexibility and the ability to match the number of threads to the wait/computer, or W/C, ratio as discussed previously. Another reason to avoid using parallel streams when I/O waits are involved in the stream-processing pipeline is that the laziness of streams can make it harder to reason about when the waits actually happen.</li>
+</ol>
+<ul>
+<li><p>Note that using the <strong>thenApply</strong> method doesn’t block your code until the Completable-Future on which you’re invoking it is completed.</p>
+</li>
+<li><p>The Java 8 CompletableFutures API provides the <strong>thenCompose</strong> method specifically for this purpose, allowing you to <strong>pipeline two asynchronous operations</strong>, passing the result of the first operation to the second operation when it becomes available. In other words, you can compose two CompletableFutures by invoking the thenCompose method on the first CompletableFuture and passing to it a Function. This Function has as argument the value returned by that first CompletableFuture when it completes, and it returns a second CompletableFuture that uses the result of the first as input for its computation.</p>
+</li>
+<li><p>The allOf factory method takes as input an array of CompletableFutures and returns a CompletableFuture<void> that’s completed only when all the CompletableFutures passed have completed. This means that invoking join on the CompletableFuture returned by the allOf method provides an easy way to wait for the completion of all the CompletableFutures in the original stream.</void></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CompletableFuture.allOf(futures).join();</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>You can <strong>asynchronously consume from a synchronous API</strong> by simply wrapping its invocation in a CompletableFuture.</p>
+</li>
+<li><p>The class <strong>LocalDate</strong> is probably the first one you’ll come across when you start using the new Date and Time API. An instance of this class is an <strong>immutable</strong> object representing just a plain date without the time of day. In particular, it doesn’t carry any information about the time zone.</p>
+</li>
+<li><p><strong>Instant</strong> is intended for use only by a <strong>machine</strong>. It consists of a number of seconds and nanoseconds.</p>
+</li>
+<li><p>If you want to define the <strong>TemporalAdjuster</strong> with a lambda expression, it’s preferable to do it using the <strong>ofDateAdjuster</strong> static factory of the TemporalAdjusters class that accepts a UnaryOperator<localdate> as follows:</localdate></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">TemporalAdjuster nextWorkingDay = TemporalAdjusters.ofDateAdjuster(</span><br><span class="line">   temporal -&gt; &#123;</span><br><span class="line">       DayOfWeek dow =</span><br><span class="line">               DayOfWeek.of(temporal.get(ChronoField.DAY_OF_WEEK));</span><br><span class="line">       int dayToAdd = 1;</span><br><span class="line">       if (dow == DayOfWeek.FRIDAY) dayToAdd = 3;</span><br><span class="line">       if (dow == DayOfWeek.SATURDAY) dayToAdd = 2;</span><br><span class="line">       return temporal.plus(dayToAdd, ChronoUnit.DAYS);</span><br><span class="line">   &#125;);</span><br><span class="line">date = date.with(nextWorkingDay);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>In comparison to the old java.util.DateFormat class, all the DateTimeFormatter instances are <strong>thread-safe</strong>.</p>
+</li>
+<li><p>The new <code>java.time.ZoneId</code> class is the replacement for the old java.util.TimeZone class.</p>
+</li>
+<li><p>The region IDs are all in the format “{area}/{city}” and the set of available locations is the one supplied by the <strong>IANA Time Zone Database</strong>.</p>
+</li>
+<li><p>Making sense of a ZonedDateTime<br><img src="https://user-images.githubusercontent.com/968283/44899475-748b7000-ad34-11e8-9497-f8af329f045b.png" alt="ZonedDateTime"></p>
+</li>
+<li><p><strong>it’s recommended to use LocalDate throughout your application, including all storage, manipulation, and interpretation of business rules, whereas you should employ Chrono-LocalDate only when you need to localize the input or output of your program</strong>.</p>
+</li>
+<li><p>The date-time objects of the new Date and Time API are all <strong>immutable</strong>.</p>
+</li>
+<li><p><strong>TemporalAdjusters</strong> allow you to manipulate a date in a more complex way than just changing one of its values, and you can define and use your own custom date transformations.</p>
+</li>
+<li><p>The restrictions on “no visible side-effects” (no mutating structure visible to callers, no I/O, no exceptions) encode the concept of <strong>referential transparency</strong>. A function is referentially transparent if it always returns the same result value when called with the same argument value. The method String.replace is referentially transparent because “raoul”.replace(‘r’, ‘R’) will always produce the same result (the method replace returns a new String with all lowercase ‘r’ replaced with uppercase ‘R’) rather than updating its this object so it can be considered a function.</p>
+</li>
+<li><p>Figures 13.5 and 13.6 illustrate the difference between the recursive and tail-recursive definitions of factorial.<br><img src="https://user-images.githubusercontent.com/968283/44899483-7bb27e00-ad34-11e8-8a9e-1d8108e5a61b.png" alt="Figures 13.5"><br><img src="https://user-images.githubusercontent.com/968283/44899487-810fc880-ad34-11e8-9371-99b3a93c5092.png" alt="Figures 13.6"></p>
+</li>
+</ul>
+<ul>
+<li><p>The bad news is that <strong>Java doesn’t support this kind of optimization</strong>. But adopting tail recursion may be a better practice than classic recursion because it opens the way to eventual compiler optimization. Many modern JVM languages such as Scala and Groovy can optimize those uses of recursion, which are equivalent to iteration (they’ll execute at the same speed). This means that pure-functional adherents can have their purity cake and eat it efficiently too.</p>
+</li>
+<li><p>In Java 8 it’s perfectly valid to store the method Integer.parseInt in a variable by using a method reference as follows:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Function&lt;String, Integer&gt; strToInt = Integer::parseInt;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Functions (like Comparator.comparing) that can do at least one of the following are called <strong>higher-order functions</strong> within the functional programming community:</p>
+</li>
+</ul>
+<ol>
+<li>Take one or more functions as parameter</li>
+<li>Return a function as result</li>
+</ol>
+<ul>
+<li>No existing data structure was harmed during the making of this update to the Tree.<br><img src="https://user-images.githubusercontent.com/968283/44899501-8705a980-ad34-11e8-85cb-0b294fc99c0c.png" alt="Figure 14.4."></li>
+</ul>
+
+    </article>
+    <!-- 前后页  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+                <div class="nextSlogan">Next Post</div>
+                <a href= "/2018/07/30/2018-07-30-flowable-file-Interpretation/" title= Flowable中的几个重要字段 >
+                    <div class="nextTitle">Flowable中的几个重要字段</div>
+                </a>
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href= "/2018/07/08/2018-07-08-深入理解Java虚拟机/" title= 深入理解Java虚拟机:JVM高级特性与最佳实践(第2版) >
+                    <div class="prevTitle">深入理解Java虚拟机:JVM高级特性与最佳实践(第2版)</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
+    
+    
+<div id="container"></div>
+<link rel="stylesheet" href="https://oopstorm.github.io/gitment/style/default.css">
+<script src="https://oopstorm.github.io/gitment/dist/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: '2018/07/29',
+        owner: 'oopstorm',
+        admin: ['AlphaHinex', '2015lym'],
+        repo: 'oopstorm.github.io',
+        oauth: {
+            client_id: '97de8cf027f56d1c6816',
+            client_secret: '008570f35d326dd0237853d68dfd044a84f75af9',
+        },
+    })
+    gitment.render('container')
+</script>
+
+    <!--PC版-->
+
+    <!--PC版-->
+
+
+    
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+    
+        
+            
+                <a href="//github.com/oopstorm" class="iconfont-archer github" target="_blank" title=github></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- 不蒜子  -->
+    
+    <div class="busuanzi-container">
+        <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span>
+        </span>
+    </div>
+    
+</footer>
+    </div>
+    <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Java-8-in-Action-8-5"><span class="toc-number">1.</span> <span class="toc-text">Java 8 in Action | 8.5</span></a></li></ol>
+    </div>
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-archive"> Total : 40 </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> 2019 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/31</span><a class="archive-post-title" href= "/2019/07/31/2019-07-31-java-performance/" >Java 性能权威指南</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/11</span><a class="archive-post-title" href= "/2019/06/11/2019-06-11-Selenium-IDE-构建自动化测试/" >Selenium IDE 构建自动化测试</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/03</span><a class="archive-post-title" href= "/2019/06/03/2019-06-03-Selenium2自动化测试实战/" >Selenium 2 自动化测试实战 基于Python语言</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/30</span><a class="archive-post-title" href= "/2019/05/30/2019-05-30-java核心技术卷-基础知识/" >java核心技术卷-基础知识</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/29</span><a class="archive-post-title" href= "/2019/05/29/2019-05-29-Head-First-SQL/" >Head First SQL</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/28</span><a class="archive-post-title" href= "/2019/05/28/2019-05-28-影响力/" >影响力</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/27</span><a class="archive-post-title" href= "/2019/05/27/2019-05-27-devops故障排除/" >devops故障排除</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/26</span><a class="archive-post-title" href= "/2019/05/26/2019-05-26-spring-cloud-microservice/" >Spring Cloud 微服务实战</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/27</span><a class="archive-post-title" href= "/2019/03/27/2019-03-27-how-tomcat-works/" >How Tomcat Works</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2018 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/31</span><a class="archive-post-title" href= "/2018/12/31/2018-12-31-把时间当作朋友/" >把时间当作朋友</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/30</span><a class="archive-post-title" href= "/2018/12/30/2018-12-30-beautiful-math/" >数学之美</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/05</span><a class="archive-post-title" href= "/2018/11/05/2018-11-05-tensorflow实战/" >Tensorflow：实战Google深度学习框架</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/29</span><a class="archive-post-title" href= "/2018/10/29/2018-10-29-When-Used-Mongo/" >什么时候用Mongo</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/25</span><a class="archive-post-title" href= "/2018/10/25/2018-10-25-用户调研及存储用户模型方法之分享篇/" >用户调研及存储用户模型之分享篇</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/20</span><a class="archive-post-title" href= "/2018/10/20/2018-10-20-markdownhere/" >如何将markdown格式无痛转成微信需要的富文本格式</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/19</span><a class="archive-post-title" href= "/2018/10/19/2018-10-19-UX（用户体验）思考方式/" >UX（用户体验）的思考方式</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/15</span><a class="archive-post-title" href= "/2018/10/15/2018-10-15-hackers-and-painters/" >黑客与画家</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/28</span><a class="archive-post-title" href= "/2018/09/28/2018-09-28-flowable-messageEventboundary/" >Flowable消息边界事件</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/27</span><a class="archive-post-title" href= "/2018/09/27/2018-09-27-mongoDB-rep/" >mongoDB4.0副本集讲解及配置</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/03</span><a class="archive-post-title" href= "/2018/09/03/2018-09-03-aboutface4/" >about face 4.0交互设计精髓</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/01</span><a class="archive-post-title" href= "/2018/09/01/2018-09-01-妙笔生花的秘密——商务写作新规则/" >妙笔生花的秘密——商务写作新规则</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/31</span><a class="archive-post-title" href= "/2018/08/31/2018-08-31-ci-need-to-build/" >git gradle持续集成按需构建</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/30</span><a class="archive-post-title" href= "/2018/08/30/2018-08-30-flowable-dataobject/" >Flowable DataObject的使用(flowable自定义流程标题)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/31</span><a class="archive-post-title" href= "/2018/07/31/2018-07-31-flowable-skip/" >Flowable SKIP</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/30</span><a class="archive-post-title" href= "/2018/07/30/2018-07-30-flowable-file-Interpretation/" >Flowable中的几个重要字段</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/29</span><a class="archive-post-title" href= "/2018/07/29/2018-07-29-java-8-in-action/" >Java 8 in Action</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/08</span><a class="archive-post-title" href= "/2018/07/08/2018-07-08-深入理解Java虚拟机/" >深入理解Java虚拟机:JVM高级特性与最佳实践(第2版)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/06</span><a class="archive-post-title" href= "/2018/07/06/2018-07-06-Spring-in-Action/" >Spring in Action</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/05</span><a class="archive-post-title" href= "/2018/07/05/2018-07-05-NPDP/" >产品经理认证（NPDP）知识体系指南</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/04</span><a class="archive-post-title" href= "/2018/07/04/2018-07-04-在你身边，为你设计/" >在你身边，为你设计</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/15</span><a class="archive-post-title" href= "/2018/05/15/2018-05-15-liquibase-with-gradle/" >Using Liquibase with Gradle in Spring Project</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/10</span><a class="archive-post-title" href= "/2018/04/10/2018-04-10-clean-code/" >代码整洁之道</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/09</span><a class="archive-post-title" href= "/2018/04/09/2018-04-09-Spring4.x-enterprise-application-development-real-battle/" >Spring 4.X 企业应用开发实战</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/08</span><a class="archive-post-title" href= "/2018/04/08/2018-04-08-how-to-win-friends-and-influence-people/" >人性的弱点</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/07</span><a class="archive-post-title" href= "/2018/04/07/2018-04-07-everyone-is-a-pm/" >人人都是产品经理</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/06</span><a class="archive-post-title" href= "/2018/04/06/2018-04-06-the-elements-of-user-experience/" >用户体验要素</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/05</span><a class="archive-post-title" href= "/2018/04/05/2018-04-05-head-first-design-patterns/" >Head First Design Patterns</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/04</span><a class="archive-post-title" href= "/2018/04/04/2018-04-04-7-languages-in-7-weeks/" >七周其语言：理解多种编程泛型</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/03</span><a class="archive-post-title" href= "/2018/04/03/2018-04-03-http/" >图解 HTTP</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/02</span><a class="archive-post-title" href= "/2018/04/02/hello-world/" >Hello World</a>
+        </li>
+    
+    </div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="bookworms"><span class="iconfont-archer">&#xe606;</span>bookworms</span>
+    
+        <span class="sidebar-tag-name" data-tags="Liquibase"><span class="iconfont-archer">&#xe606;</span>Liquibase</span>
+    
+        <span class="sidebar-tag-name" data-tags="Spring"><span class="iconfont-archer">&#xe606;</span>Spring</span>
+    
+        <span class="sidebar-tag-name" data-tags="Gradle"><span class="iconfont-archer">&#xe606;</span>Gradle</span>
+    
+        <span class="sidebar-tag-name" data-tags="workflow"><span class="iconfont-archer">&#xe606;</span>workflow</span>
+    
+        <span class="sidebar-tag-name" data-tags="mongoDB"><span class="iconfont-archer">&#xe606;</span>mongoDB</span>
+    
+        <span class="sidebar-tag-name" data-tags="用户体验"><span class="iconfont-archer">&#xe606;</span>用户体验</span>
+    
+        <span class="sidebar-tag-name" data-tags="tools"><span class="iconfont-archer">&#xe606;</span>tools</span>
+    
+        <span class="sidebar-tag-name" data-tags="用户体验 产品设计"><span class="iconfont-archer">&#xe606;</span>用户体验 产品设计</span>
+    
+        <span class="sidebar-tag-name" data-tags="mongo"><span class="iconfont-archer">&#xe606;</span>mongo</span>
+    
+        <span class="sidebar-tag-name" data-tags="Tensorflow 深度学习"><span class="iconfont-archer">&#xe606;</span>Tensorflow 深度学习</span>
+    
+        <span class="sidebar-tag-name" data-tags="Selenium Selenium2 自动化测试"><span class="iconfont-archer">&#xe606;</span>Selenium Selenium2 自动化测试</span>
+    
+        <span class="sidebar-tag-name" data-tags="Selenium IDE 自动化测试"><span class="iconfont-archer">&#xe606;</span>Selenium IDE 自动化测试</span>
+    
+        <span class="sidebar-tag-name" data-tags="随笔"><span class="iconfont-archer">&#xe606;</span>随笔</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br/>
+    1、请确保node版本大于6.2<br/>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br/>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br/>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: '/',
+        author: 'John Doe'
+    }
+</script>
+    <!-- busuanzi  -->
+    
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
+    
+    </body>
+</html>
+
+

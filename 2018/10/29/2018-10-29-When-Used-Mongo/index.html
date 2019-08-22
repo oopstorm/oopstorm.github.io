@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html>
+    <!-- title -->
+
+
+
+
+
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>什么时候用Mongo · OopStorm</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+        box-shadow: 0 0 3px 0 rgba(0, 0, 0, 0.7);
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s 1;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href="/css/style.css?v=20180311" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="stylesheet" type="text/css" href="/css/mobile.css?v=20180311" media="(max-width: 980px)">
+    <link rel="icon" href="/assets/favicon.ico">
+    <script>
+  // load webfont-loader async, and add callback function
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+  
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntroTags = document.getElementsByClassName('post-intro-tags')[0],
+        postIntroMeat = document.getElementsByClassName('post-intro-meta')[0];
+      if (postIntroTags) {
+        postIntroTags.classList.add('post-fade-in');
+      }
+      if (postIntroMeat) {
+        postIntroMeat.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  async("https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", asyncCb)
+</script>
+    <script>
+        (function (w) {
+            "use strict";
+            // rel=preload support test
+            if (!w.loadCSS) {
+                w.loadCSS = function () { };
+            }
+            // define on the loadCSS obj
+            var rp = loadCSS.relpreload = {};
+            // rel=preload feature support test
+            // runs once and returns a function for compat purposes
+            rp.support = (function () {
+                var ret;
+                try {
+                    ret = w.document.createElement("link").relList.supports("preload");
+                } catch (e) {
+                    ret = false;
+                }
+                return function () {
+                    return ret;
+                };
+            })();
+
+            // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+            // then change that media back to its intended value on load
+            rp.bindMediaToggle = function (link) {
+                // remember existing media attr for ultimate state, or default to 'all'
+                var finalMedia = link.media || "all";
+
+                function enableStylesheet() {
+                    link.media = finalMedia;
+                }
+
+                // bind load handlers to enable media
+                if (link.addEventListener) {
+                    link.addEventListener("load", enableStylesheet);
+                } else if (link.attachEvent) {
+                    link.attachEvent("onload", enableStylesheet);
+                }
+
+                // Set rel and non-applicable media type to start an async request
+                // note: timeout allows this to happen async to let rendering continue in IE
+                setTimeout(function () {
+                    link.rel = "stylesheet";
+                    link.media = "only x";
+                });
+                // also enable media after 3 seconds,
+                // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+                setTimeout(enableStylesheet, 3000);
+            };
+
+            // loop through link elements in DOM
+            rp.poly = function () {
+                // double check this to prevent external calls from running
+                if (rp.support()) {
+                    return;
+                }
+                var links = w.document.getElementsByTagName("link");
+                for (var i = 0; i < links.length; i++) {
+                    var link = links[i];
+                    // qualify links to those with rel=preload and as=style attrs
+                    if (link.rel === "preload" && link.getAttribute("as") === "style" && !link.getAttribute("data-loadcss")) {
+                        // prevent rerunning on link
+                        link.setAttribute("data-loadcss", true);
+                        // bind listeners to toggle media back
+                        rp.bindMediaToggle(link);
+                    }
+                }
+            };
+
+            // if unsupported, run the polyfill
+            if (!rp.support()) {
+                // run once at least
+                rp.poly();
+
+                // rerun poly on an interval until onload
+                var run = w.setInterval(rp.poly, 500);
+                if (w.addEventListener) {
+                    w.addEventListener("load", function () {
+                        rp.poly();
+                        w.clearInterval(run);
+                    });
+                } else if (w.attachEvent) {
+                    w.attachEvent("onload", function () {
+                        rp.poly();
+                        w.clearInterval(run);
+                    });
+                }
+            }
+            // commonjs
+            if (typeof exports !== "undefined") {
+                exports.loadCSS = loadCSS;
+            }
+            else {
+                w.loadCSS = loadCSS;
+            }
+        }(typeof global !== "undefined" ? global : this));
+    </script>
+    <script src="//cdn.staticfile.org/jquery/3.2.1/jquery.min.js" defer></script>
+    <script src="/scripts/main.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+</head>
+
+    
+        <body class="post-body">
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/" >OopStorm</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">什么时候用Mongo</a>
+            </div>
+    </div>
+    
+    <a class="home-link" href=/>OopStorm</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style=
+
+
+
+
+
+
+
+
+height:50vh;
+
+>
+    
+    <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
+            
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg.jpg)"></div>
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+            什么时候用Mongo
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+            
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+            <!-- 文章页标签  -->
+            
+                <div class= post-intro-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = mongo>mongo</a>
+    
+</div>
+            
+            <div class="post-intro-meta">
+                <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                <span class="post-intro-time">2018/10/29</span>
+                
+                <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                    <span class="iconfont-archer">&#xe602;</span>
+                    <span id="busuanzi_value_page_pv"></span>
+                </span>
+                
+                <span class="shareWrapper">
+                    <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                    <span class="shareText">Share</span>
+                    <ul class="shareList">
+                        <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                            <div class="share-qrcode"></div>
+                        </li>
+                        <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                        <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                        <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                        <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                    </ul>
+                </span>
+            </div>
+        
+    </div>
+</div>
+        <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+
+        <div class="container container-unloaded">
+            <main class="main post-page">
+    <article class="article-entry">
+        <p>这为什么会用mongo？这还用得着mysql?这你怎么用redis！！是我承认，上述问题每个月都会在我的内心中纠结那么一两次，于是我痛下决心决定给自己定下一个标准，什么时候用什么比较好。</p>
+<h1 id="1-读写间的区别"><a href="#1-读写间的区别" class="headerlink" title="1.读写间的区别"></a>1.读写间的区别</h1><p>①Redis<br>redis的数据是存放在服务器内存的，当内存满了以后就需要扩容，采用redis分布式方案，为了防止redis数据丢失，可以调整redis配置，按照一定的策略将数据持久化到硬盘</p>
+<p>②MongoDB<br>Mongo同时使用了内存和硬盘，采用<a href="https://baike.baidu.com/item/mmap/1322217?fr=aladdin" target="_blank" rel="noopener">MMAP</a>机制对文件进行读写,可以简单理解为将一部分映射到内存，然后再从内存查</p>
+<p>③Mysql<br>mysql毫无疑问是存在硬盘的，就是这么硬</p>
+<h1 id="2-查找数据的区别"><a href="#2-查找数据的区别" class="headerlink" title="2.查找数据的区别"></a>2.查找数据的区别</h1><p>①Redis<br>redis采用键值对方式存数据，有key值的时候直接查非常快</p>
+<p>②MongoDB和Mysql<br>都支持Id(主键)和索引，当用id和索引查的时候效率高，没有id和索引的时候效率低，对于mysql索引可以看看《高性能Mysql》里面讲的很详细。</p>
+<h1 id="3-该如何选择呢"><a href="#3-该如何选择呢" class="headerlink" title="3.该如何选择呢"></a>3.该如何选择呢</h1><p>①Redis<br>读写速度快，但是内存成本高，所以一般读写频率比较高且查找简单（Redis是key-value存储）的场景比较适合redis，比如用户的身份验证信息。</p>
+<p>②MongoDB</p>
+<ul>
+<li>大尺寸，低价值</li>
+<li>高伸缩性：多服务器组成的集群数据库</li>
+<li>存储地理坐标：划重点，MongoDB的地理坐标查询功能非常强大，这个之前笔者也没了解过，稍后我们在下一段试试这个强大的地理坐标查询</li>
+<li>不适用于高度事务和复杂SQL：虽然高版本mongo已经支持了事务，但是用起来还是没有传统关系型来的自在，所以遇到高度事务的场景还是不要给自己找麻烦了，用mysql。复杂查询也是，mongoDB虽然支持查询语句，但是跟mysql比查询的能力还是不够强大(可能是我没用的很明白，不过欢迎在留言处进行反驳)。</li>
+</ul>
+<p>③Mysql<br>MongoDB不适用的场景就用mysql，没错就是这样。</p>
+<h1 id="4-MongoDB的地址查询是什么，我已经等不及了"><a href="#4-MongoDB的地址查询是什么，我已经等不及了" class="headerlink" title="4.MongoDB的地址查询是什么，我已经等不及了"></a>4.MongoDB的地址查询是什么，我已经等不及了</h1><p>①输入沈阳地点的坐标<a href="https://map.baidu.com/" target="_blank" rel="noopener">百度坐标拾取器</a>大家也可以拾取自己家乡的坐标来玩<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">db.location.insert(&#123;<span class="string">"name"</span>:<span class="string">"市府广场"</span>,<span class="string">"coordinate"</span>:&#123;<span class="string">"longitude"</span>:<span class="number">123.440708</span>,<span class="string">"latitude"</span>:<span class="number">41.810372</span>&#125;&#125;)</span><br><span class="line">db.location.insert(&#123;<span class="string">"name"</span>:<span class="string">"八一公园"</span>,<span class="string">"coordinate"</span>:&#123;<span class="string">"longitude"</span>:<span class="number">123.431399</span>,<span class="string">"latitude"</span>:<span class="number">41.807845</span>&#125;&#125;)</span><br><span class="line">db.location.insert(&#123;<span class="string">"name"</span>:<span class="string">"华府天地"</span>,<span class="string">"coordinate"</span>:&#123;<span class="string">"longitude"</span>:<span class="number">123.441639</span>,<span class="string">"latitude"</span>:<span class="number">41.817177</span>&#125;&#125;)</span><br><span class="line">db.location.insert(&#123;<span class="string">"name"</span>:<span class="string">"张士灯具城"</span>,<span class="string">"coordinate"</span>:&#123;<span class="string">"longitude"</span>:<span class="number">123.294777</span>,<span class="string">"latitude"</span>:<span class="number">41.770025</span>&#125;&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>②MongoDB的原生地理索引支持两种，一个是平面的一个是球面的</p>
+<ul>
+<li><p>平面索引</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">db.location.ensureIndex(&#123;<span class="string">'coordinate'</span>:<span class="string">'2d'</span>&#125;)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>球面索引</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">db.location.ensureIndex(&#123;<span class="string">'coordinate'</span>:<span class="string">'2dsphere'</span>&#125;)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>显而易见,追求精度的话使用球面查最准，如果距离跨度不大用平面查就可以。</p>
+<p>③查询一波<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">db.location.find(&#123;</span><br><span class="line">    <span class="string">"coordinate"</span>:&#123;</span><br><span class="line">      <span class="comment">//当前点坐标</span></span><br><span class="line">     <span class="string">"$near"</span>:[<span class="number">123.441363</span>,<span class="number">41.82645</span>],</span><br><span class="line">      <span class="comment">//如果指定的点是GeoJSON，则以米为单位指定距离;如果指定的点是遗留坐标对，则以弧度为单位指定距离</span></span><br><span class="line">     <span class="string">"$maxDistance"</span>:<span class="number">0.1</span></span><br><span class="line">   &#125;</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure></p>
+<p>得出的结果是没有张士灯具城，<a href="https://docs.mongodb.com/manual/reference/command/geoNear/#dbcmd.geoNear" target="_blank" rel="noopener">坐标查询文档</a></p>
+<p>好了感慨一下mongo的强大，然后总结一下，从上述几点我们能很明显的看出来，有事务和复杂查询需求的我们应该用关系型，除此之外用mongo，调用非常频繁且查询简单的我们用redis。<br>ok,就说这些，欢迎大家指出文章的不足，已经我认识的不足，如果对你有帮助请点赞，谢谢（PHP是世界最好的语言没有之一）</p>
+
+    </article>
+    <!-- 前后页  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+                <div class="nextSlogan">Next Post</div>
+                <a href= "/2018/11/05/2018-11-05-tensorflow实战/" title= Tensorflow：实战Google深度学习框架 >
+                    <div class="nextTitle">Tensorflow：实战Google深度学习框架</div>
+                </a>
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href= "/2018/10/25/2018-10-25-用户调研及存储用户模型方法之分享篇/" title= 用户调研及存储用户模型之分享篇 >
+                    <div class="prevTitle">用户调研及存储用户模型之分享篇</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
+    
+    
+<div id="container"></div>
+<link rel="stylesheet" href="https://oopstorm.github.io/gitment/style/default.css">
+<script src="https://oopstorm.github.io/gitment/dist/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: '2018/10/29',
+        owner: 'oopstorm',
+        admin: ['AlphaHinex', '2015lym'],
+        repo: 'oopstorm.github.io',
+        oauth: {
+            client_id: '97de8cf027f56d1c6816',
+            client_secret: '008570f35d326dd0237853d68dfd044a84f75af9',
+        },
+    })
+    gitment.render('container')
+</script>
+
+    <!--PC版-->
+
+    <!--PC版-->
+
+
+    
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+    
+        
+            
+                <a href="//github.com/oopstorm" class="iconfont-archer github" target="_blank" title=github></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- 不蒜子  -->
+    
+    <div class="busuanzi-container">
+        <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span>
+        </span>
+    </div>
+    
+</footer>
+    </div>
+    <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-读写间的区别"><span class="toc-number">1.</span> <span class="toc-text">1.读写间的区别</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-查找数据的区别"><span class="toc-number">2.</span> <span class="toc-text">2.查找数据的区别</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-该如何选择呢"><span class="toc-number">3.</span> <span class="toc-text">3.该如何选择呢</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-MongoDB的地址查询是什么，我已经等不及了"><span class="toc-number">4.</span> <span class="toc-text">4.MongoDB的地址查询是什么，我已经等不及了</span></a></li></ol>
+    </div>
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-archive"> Total : 40 </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> 2019 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/31</span><a class="archive-post-title" href= "/2019/07/31/2019-07-31-java-performance/" >Java 性能权威指南</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/11</span><a class="archive-post-title" href= "/2019/06/11/2019-06-11-Selenium-IDE-构建自动化测试/" >Selenium IDE 构建自动化测试</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/03</span><a class="archive-post-title" href= "/2019/06/03/2019-06-03-Selenium2自动化测试实战/" >Selenium 2 自动化测试实战 基于Python语言</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/30</span><a class="archive-post-title" href= "/2019/05/30/2019-05-30-java核心技术卷-基础知识/" >java核心技术卷-基础知识</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/29</span><a class="archive-post-title" href= "/2019/05/29/2019-05-29-Head-First-SQL/" >Head First SQL</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/28</span><a class="archive-post-title" href= "/2019/05/28/2019-05-28-影响力/" >影响力</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/27</span><a class="archive-post-title" href= "/2019/05/27/2019-05-27-devops故障排除/" >devops故障排除</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/26</span><a class="archive-post-title" href= "/2019/05/26/2019-05-26-spring-cloud-microservice/" >Spring Cloud 微服务实战</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/27</span><a class="archive-post-title" href= "/2019/03/27/2019-03-27-how-tomcat-works/" >How Tomcat Works</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2018 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/31</span><a class="archive-post-title" href= "/2018/12/31/2018-12-31-把时间当作朋友/" >把时间当作朋友</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/30</span><a class="archive-post-title" href= "/2018/12/30/2018-12-30-beautiful-math/" >数学之美</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/05</span><a class="archive-post-title" href= "/2018/11/05/2018-11-05-tensorflow实战/" >Tensorflow：实战Google深度学习框架</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/29</span><a class="archive-post-title" href= "/2018/10/29/2018-10-29-When-Used-Mongo/" >什么时候用Mongo</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/25</span><a class="archive-post-title" href= "/2018/10/25/2018-10-25-用户调研及存储用户模型方法之分享篇/" >用户调研及存储用户模型之分享篇</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/20</span><a class="archive-post-title" href= "/2018/10/20/2018-10-20-markdownhere/" >如何将markdown格式无痛转成微信需要的富文本格式</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/19</span><a class="archive-post-title" href= "/2018/10/19/2018-10-19-UX（用户体验）思考方式/" >UX（用户体验）的思考方式</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/15</span><a class="archive-post-title" href= "/2018/10/15/2018-10-15-hackers-and-painters/" >黑客与画家</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/28</span><a class="archive-post-title" href= "/2018/09/28/2018-09-28-flowable-messageEventboundary/" >Flowable消息边界事件</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/27</span><a class="archive-post-title" href= "/2018/09/27/2018-09-27-mongoDB-rep/" >mongoDB4.0副本集讲解及配置</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/03</span><a class="archive-post-title" href= "/2018/09/03/2018-09-03-aboutface4/" >about face 4.0交互设计精髓</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/01</span><a class="archive-post-title" href= "/2018/09/01/2018-09-01-妙笔生花的秘密——商务写作新规则/" >妙笔生花的秘密——商务写作新规则</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/31</span><a class="archive-post-title" href= "/2018/08/31/2018-08-31-ci-need-to-build/" >git gradle持续集成按需构建</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/30</span><a class="archive-post-title" href= "/2018/08/30/2018-08-30-flowable-dataobject/" >Flowable DataObject的使用(flowable自定义流程标题)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/31</span><a class="archive-post-title" href= "/2018/07/31/2018-07-31-flowable-skip/" >Flowable SKIP</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/30</span><a class="archive-post-title" href= "/2018/07/30/2018-07-30-flowable-file-Interpretation/" >Flowable中的几个重要字段</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/29</span><a class="archive-post-title" href= "/2018/07/29/2018-07-29-java-8-in-action/" >Java 8 in Action</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/08</span><a class="archive-post-title" href= "/2018/07/08/2018-07-08-深入理解Java虚拟机/" >深入理解Java虚拟机:JVM高级特性与最佳实践(第2版)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/06</span><a class="archive-post-title" href= "/2018/07/06/2018-07-06-Spring-in-Action/" >Spring in Action</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/05</span><a class="archive-post-title" href= "/2018/07/05/2018-07-05-NPDP/" >产品经理认证（NPDP）知识体系指南</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/04</span><a class="archive-post-title" href= "/2018/07/04/2018-07-04-在你身边，为你设计/" >在你身边，为你设计</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/15</span><a class="archive-post-title" href= "/2018/05/15/2018-05-15-liquibase-with-gradle/" >Using Liquibase with Gradle in Spring Project</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/10</span><a class="archive-post-title" href= "/2018/04/10/2018-04-10-clean-code/" >代码整洁之道</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/09</span><a class="archive-post-title" href= "/2018/04/09/2018-04-09-Spring4.x-enterprise-application-development-real-battle/" >Spring 4.X 企业应用开发实战</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/08</span><a class="archive-post-title" href= "/2018/04/08/2018-04-08-how-to-win-friends-and-influence-people/" >人性的弱点</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/07</span><a class="archive-post-title" href= "/2018/04/07/2018-04-07-everyone-is-a-pm/" >人人都是产品经理</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/06</span><a class="archive-post-title" href= "/2018/04/06/2018-04-06-the-elements-of-user-experience/" >用户体验要素</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/05</span><a class="archive-post-title" href= "/2018/04/05/2018-04-05-head-first-design-patterns/" >Head First Design Patterns</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/04</span><a class="archive-post-title" href= "/2018/04/04/2018-04-04-7-languages-in-7-weeks/" >七周其语言：理解多种编程泛型</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/03</span><a class="archive-post-title" href= "/2018/04/03/2018-04-03-http/" >图解 HTTP</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/02</span><a class="archive-post-title" href= "/2018/04/02/hello-world/" >Hello World</a>
+        </li>
+    
+    </div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="bookworms"><span class="iconfont-archer">&#xe606;</span>bookworms</span>
+    
+        <span class="sidebar-tag-name" data-tags="Liquibase"><span class="iconfont-archer">&#xe606;</span>Liquibase</span>
+    
+        <span class="sidebar-tag-name" data-tags="Spring"><span class="iconfont-archer">&#xe606;</span>Spring</span>
+    
+        <span class="sidebar-tag-name" data-tags="Gradle"><span class="iconfont-archer">&#xe606;</span>Gradle</span>
+    
+        <span class="sidebar-tag-name" data-tags="workflow"><span class="iconfont-archer">&#xe606;</span>workflow</span>
+    
+        <span class="sidebar-tag-name" data-tags="mongoDB"><span class="iconfont-archer">&#xe606;</span>mongoDB</span>
+    
+        <span class="sidebar-tag-name" data-tags="用户体验"><span class="iconfont-archer">&#xe606;</span>用户体验</span>
+    
+        <span class="sidebar-tag-name" data-tags="tools"><span class="iconfont-archer">&#xe606;</span>tools</span>
+    
+        <span class="sidebar-tag-name" data-tags="用户体验 产品设计"><span class="iconfont-archer">&#xe606;</span>用户体验 产品设计</span>
+    
+        <span class="sidebar-tag-name" data-tags="mongo"><span class="iconfont-archer">&#xe606;</span>mongo</span>
+    
+        <span class="sidebar-tag-name" data-tags="Tensorflow 深度学习"><span class="iconfont-archer">&#xe606;</span>Tensorflow 深度学习</span>
+    
+        <span class="sidebar-tag-name" data-tags="Selenium Selenium2 自动化测试"><span class="iconfont-archer">&#xe606;</span>Selenium Selenium2 自动化测试</span>
+    
+        <span class="sidebar-tag-name" data-tags="Selenium IDE 自动化测试"><span class="iconfont-archer">&#xe606;</span>Selenium IDE 自动化测试</span>
+    
+        <span class="sidebar-tag-name" data-tags="随笔"><span class="iconfont-archer">&#xe606;</span>随笔</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br/>
+    1、请确保node版本大于6.2<br/>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br/>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br/>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: '/',
+        author: 'John Doe'
+    }
+</script>
+    <!-- busuanzi  -->
+    
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
+    
+    </body>
+</html>
+
+

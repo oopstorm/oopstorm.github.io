@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html>
+    <!-- title -->
+
+
+
+
+
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OopStorm</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+        box-shadow: 0 0 3px 0 rgba(0, 0, 0, 0.7);
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s 1;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href="/css/style.css?v=20180311" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="stylesheet" type="text/css" href="/css/mobile.css?v=20180311" media="(max-width: 980px)">
+    <link rel="icon" href="/assets/favicon.ico">
+    <script>
+  // load webfont-loader async, and add callback function
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+  
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntroTags = document.getElementsByClassName('post-intro-tags')[0],
+        postIntroMeat = document.getElementsByClassName('post-intro-meta')[0];
+      if (postIntroTags) {
+        postIntroTags.classList.add('post-fade-in');
+      }
+      if (postIntroMeat) {
+        postIntroMeat.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  async("https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", asyncCb)
+</script>
+    <script>
+        (function (w) {
+            "use strict";
+            // rel=preload support test
+            if (!w.loadCSS) {
+                w.loadCSS = function () { };
+            }
+            // define on the loadCSS obj
+            var rp = loadCSS.relpreload = {};
+            // rel=preload feature support test
+            // runs once and returns a function for compat purposes
+            rp.support = (function () {
+                var ret;
+                try {
+                    ret = w.document.createElement("link").relList.supports("preload");
+                } catch (e) {
+                    ret = false;
+                }
+                return function () {
+                    return ret;
+                };
+            })();
+
+            // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+            // then change that media back to its intended value on load
+            rp.bindMediaToggle = function (link) {
+                // remember existing media attr for ultimate state, or default to 'all'
+                var finalMedia = link.media || "all";
+
+                function enableStylesheet() {
+                    link.media = finalMedia;
+                }
+
+                // bind load handlers to enable media
+                if (link.addEventListener) {
+                    link.addEventListener("load", enableStylesheet);
+                } else if (link.attachEvent) {
+                    link.attachEvent("onload", enableStylesheet);
+                }
+
+                // Set rel and non-applicable media type to start an async request
+                // note: timeout allows this to happen async to let rendering continue in IE
+                setTimeout(function () {
+                    link.rel = "stylesheet";
+                    link.media = "only x";
+                });
+                // also enable media after 3 seconds,
+                // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+                setTimeout(enableStylesheet, 3000);
+            };
+
+            // loop through link elements in DOM
+            rp.poly = function () {
+                // double check this to prevent external calls from running
+                if (rp.support()) {
+                    return;
+                }
+                var links = w.document.getElementsByTagName("link");
+                for (var i = 0; i < links.length; i++) {
+                    var link = links[i];
+                    // qualify links to those with rel=preload and as=style attrs
+                    if (link.rel === "preload" && link.getAttribute("as") === "style" && !link.getAttribute("data-loadcss")) {
+                        // prevent rerunning on link
+                        link.setAttribute("data-loadcss", true);
+                        // bind listeners to toggle media back
+                        rp.bindMediaToggle(link);
+                    }
+                }
+            };
+
+            // if unsupported, run the polyfill
+            if (!rp.support()) {
+                // run once at least
+                rp.poly();
+
+                // rerun poly on an interval until onload
+                var run = w.setInterval(rp.poly, 500);
+                if (w.addEventListener) {
+                    w.addEventListener("load", function () {
+                        rp.poly();
+                        w.clearInterval(run);
+                    });
+                } else if (w.attachEvent) {
+                    w.attachEvent("onload", function () {
+                        rp.poly();
+                        w.clearInterval(run);
+                    });
+                }
+            }
+            // commonjs
+            if (typeof exports !== "undefined") {
+                exports.loadCSS = loadCSS;
+            }
+            else {
+                w.loadCSS = loadCSS;
+            }
+        }(typeof global !== "undefined" ? global : this));
+    </script>
+    <script src="//cdn.staticfile.org/jquery/3.2.1/jquery.min.js" defer></script>
+    <script src="/scripts/main.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+</head>
+
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <a class="home-link" href=/>OopStorm</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style=
+
+
+
+
+
+
+
+
+>
+    
+    <!-- 主页  -->
+            
+    <div class="site-intro-img" style="background-image: url(/)"></div>
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+    </div>
+</div>
+        <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+
+        <div class="container container-unloaded">
+            <main class="main index-page">
+    
+    
+    
+        <article class="index-post">
+            <a class="abstract-title" href = "/2019/07/31/2019-07-31-java-performance/" >
+                
+                    <span>Java 性能权威指南</span>
+            </a>
+            <div class="abstract-content">
+                Java 性能权威指南 | 8.1
+软件运行性能是一个不可回避的问题。本书内容较新，包含 G1 回收器相关内容，对各种垃圾收集器的工作原理及调整方式都给出了较为详细的说明。同时还介绍了一些性能调优工具的用法，以便先定位问题，再进行针对性的解决。
+一些普适性的建议：
+
+过早考虑优化是所有噩梦的根源
+优化代码的目的是提升而不是降低（更短时间段内的）CPU 使用率
+Serial 收集器最适用于应用程序的内存使用少于 100MB 的场景
+一般情况下，堆空间小于 4GB 时，CMS 收集器的性能比 G1 收集器好
+使用大型堆或巨型堆时，由于 G1 收集器可以分割工作，通常它比 CMS 收集器表现更...
+            </div>
+            <div class="abstract-post-meta">
+                <!-- date  -->
+                <div class="abstract-date">
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/07/31</span>
+                </div>
+                <!-- tags  -->
+                
+                <div class= abstract-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = bookworms>bookworms</a>
+    
+</div>
+                
+            </div>
+        </article>
+    
+    
+    
+        <article class="index-post">
+            <a class="abstract-title" href = "/2019/06/11/2019-06-11-Selenium-IDE-构建自动化测试/" >
+                
+                    <span>Selenium IDE 构建自动化测试</span>
+            </a>
+            <div class="abstract-content">
+                参考 
+seleniumIDE 官方网站selenium 仓库
+安装
+selenium IDE 是一个脚本录制工具, 可在 Chrome 或者 Firefox 进行安装使用
+
+selenium side runner
+这是一个可以使用命令行执行 selenium IDE 录制脚本的工具, 可以将脚本通过命令行在任何浏览器进行执行。
+
+
+安装
+
+通过 npm 进行安装 selenium-side-runner
+ 1npm install -g selenium-side-runner
+
+
+安装浏览器驱动
+
+npm 提供了各大常用浏览器的驱动, 需安装之后才可以使用该浏览器进行执行自动化脚本...
+            </div>
+            <div class="abstract-post-meta">
+                <!-- date  -->
+                <div class="abstract-date">
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/06/11</span>
+                </div>
+                <!-- tags  -->
+                
+                <div class= abstract-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = Selenium IDE 自动化测试>Selenium IDE 自动化测试</a>
+    
+</div>
+                
+            </div>
+        </article>
+    
+    
+    
+        <article class="index-post">
+            <a class="abstract-title" href = "/2019/06/03/2019-06-03-Selenium2自动化测试实战/" >
+                
+                    <span>Selenium 2 自动化测试实战 基于Python语言</span>
+            </a>
+            <div class="abstract-content">
+                
+自动化测试基础
+测试环境搭建
+Python基础
+WebDriver API
+自动化测试模型
+Selenium IDE
+unittest 单元测试框架
+自动化测试高级应用
+Selenium Grid2
+Python多线程
+自动化测试项目实战
+BDD框架之Lettuce入门
+GitHub托管项目
+持续集成Jenkins入门
+
+WebDriver API
+
+By.ID/By.NAME/By.CLASS_NAME = 元素属性 
+
+文本链接名称 By.LINK_TEXT =&gt; &lt;a href=&quot;https://cloud.propersoft.cn/youtrack/is...
+            </div>
+            <div class="abstract-post-meta">
+                <!-- date  -->
+                <div class="abstract-date">
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/06/03</span>
+                </div>
+                <!-- tags  -->
+                
+                <div class= abstract-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = Selenium Selenium2 自动化测试>Selenium Selenium2 自动化测试</a>
+    
+</div>
+                
+            </div>
+        </article>
+    
+    
+    
+        <article class="index-post">
+            <a class="abstract-title" href = "/2019/05/30/2019-05-30-java核心技术卷-基础知识/" >
+                
+                    <span>java核心技术卷-基础知识</span>
+            </a>
+            <div class="abstract-content">
+                java核心技术卷-基础知识 | 8.0
+类之间的关系:
+
+
+依赖:    (user-a)一个类的方法操纵另一个类的对象。
+
+聚合:    (has-a)[关联]类A的对象包含类B的对象
+
+继承:    (is-a)
+类A扩展类B，类A不但包含从类B继承的方法，还会拥有一些额外的功能
+
+对象
+要想使用对象，就必须首先构造对象，并指定其初始状态。
+
+构造器构造器与类同名
+每个类可以有一个以上的构造器
+构造器可以有多个参数
+构造器没有返回值
+构造器伴随new操作一起调用
+
+
+-隐式参数与显式参数1234public void reaiseSalary(double byPercent) &...
+            </div>
+            <div class="abstract-post-meta">
+                <!-- date  -->
+                <div class="abstract-date">
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/05/30</span>
+                </div>
+                <!-- tags  -->
+                
+                <div class= abstract-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = bookworms>bookworms</a>
+    
+</div>
+                
+            </div>
+        </article>
+    
+    
+    
+        <article class="index-post">
+            <a class="abstract-title" href = "/2019/05/29/2019-05-29-Head-First-SQL/" >
+                
+                    <span>Head First SQL</span>
+            </a>
+            <div class="abstract-content">
+                Head First SQL | 8.4
+一、数据和表：保存所有东西的地方
+数据库：保存表和其它相关sql结构的内容
+表：数据库中 包含数据的结构，有行和列组成
+大写和下划线有助于编写SQL
+CREATE DATABASE gregs_list；
+CREATE TABLE my_contacts(last_name VARCHAR(30) NOT NULL, first_name VARCHAR(20) NOT NULL  DEFAULT ‘anna’);
+DROP TABLE my_contacts；
+INSERT INTO your_table（column_name1,column...
+            </div>
+            <div class="abstract-post-meta">
+                <!-- date  -->
+                <div class="abstract-date">
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/05/29</span>
+                </div>
+                <!-- tags  -->
+                
+                <div class= abstract-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = bookworms>bookworms</a>
+    
+</div>
+                
+            </div>
+        </article>
+    
+    
+    
+        <article class="index-post">
+            <a class="abstract-title" href = "/2019/05/28/2019-05-28-影响力/" >
+                
+                    <span>影响力</span>
+            </a>
+            <div class="abstract-content">
+                影响力 | 8.7
+《影响力》 分享心得
+
+我们往往被人引导着下决定，特别是在有物质交换前提下，
+
+很有可能被有心之人利用，来达到自己的目的。
+
+我们完全有必要了解这些套路来拯救自己的损失，这才是这本书的立足点
+
+一 原则概述
+
+
+
+对比原理：影响我们对先后接触到的两件事情的判断提出两种方案，供你选择，其实B选项才是他想要让你选的。
+
+互惠原理：一种行为应该用一种类似的行为来回报付出和回报，超市免费试吃，感觉不好意思买两盒尝尝。
+
+承诺和一致原理：人们倾向于将承诺和现实变为一致外界给自己压力，不得不去实现自己的诺言。说出去的话泼出去的水。
+
+社会认同原理：认同这种理念的人越多，这种理念就...
+            </div>
+            <div class="abstract-post-meta">
+                <!-- date  -->
+                <div class="abstract-date">
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/05/28</span>
+                </div>
+                <!-- tags  -->
+                
+                <div class= abstract-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = bookworms>bookworms</a>
+    
+</div>
+                
+            </div>
+        </article>
+    
+    
+    
+        <article class="index-post">
+            <a class="abstract-title" href = "/2019/05/27/2019-05-27-devops故障排除/" >
+                
+                    <span>devops故障排除</span>
+            </a>
+            <div class="abstract-content">
+                devops故障排除 | 7.0dev 故障排除
+
+第一章 故障排除的最佳实践
+1.划分问题空间（网站请求超时，可以先访问其他的网站确认网络是否正常，而不是直接去机房查看网线是否插好），团队配合也是如此，要保证某个人排除了一个原因并及时传达给其他人
+2.协同工作良好沟通（电话会议，直接对话，电子邮件，实时聊天室，备用沟通方法）
+3.快速简单测试
+4.多尝试过去的解决方案
+5.记录问题和解决方案
+6.了解改动
+7.了解系统如何工作
+8.谨慎使用Internet
+9抵制重启
+
+第二章服务器为什么这么慢？
+
+1.系统负载 uptime （后三个数字分别代表1分钟，5分钟，15分钟负载）
+2.什...
+            </div>
+            <div class="abstract-post-meta">
+                <!-- date  -->
+                <div class="abstract-date">
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/05/27</span>
+                </div>
+                <!-- tags  -->
+                
+                <div class= abstract-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = bookworms>bookworms</a>
+    
+</div>
+                
+            </div>
+        </article>
+    
+    
+    
+        <article class="index-post">
+            <a class="abstract-title" href = "/2019/05/26/2019-05-26-spring-cloud-microservice/" >
+                
+                    <span>Spring Cloud 微服务实战</span>
+            </a>
+            <div class="abstract-content">
+                Spring Cloud微服务实战 | 7.5
+《Spring Cloud微服务实战》适合所有Java开发人员，尤其适合正在做微服务架构技术选型或正在实施微服务架构的团队查阅和参考。
+本书基于 Spring Boot 1.3.7 版本，Spring Cloud Brixton.SR5 版本编写，在使用时可能与最新版本稍有差异，可参考 官方文档 中内容，按实际情况调整。
+
+            </div>
+            <div class="abstract-post-meta">
+                <!-- date  -->
+                <div class="abstract-date">
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/05/26</span>
+                </div>
+                <!-- tags  -->
+                
+                <div class= abstract-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = bookworms>bookworms</a>
+    
+</div>
+                
+            </div>
+        </article>
+    
+    
+    
+        <article class="index-post">
+            <a class="abstract-title" href = "/2019/03/27/2019-03-27-how-tomcat-works/" >
+                
+                    <span>How Tomcat Works</span>
+            </a>
+            <div class="abstract-content">
+                How Tomcat Works | 8.4
+可以使用 Facade 模式，将接口的实现类包装起来，通过 Facade，仅暴露接口中的方法，而不将实现类自己的方法暴露出去。避免了了解实现类结构时，直接将实例从接口强制转换回实现类，并调用实现类中定义的（非接口提供）的方法。使用 Facade 模式是比通过 protected 修饰符限制类访问权限更优雅的方法
+连接器是干什么用的？等待 HTTP 请求，并创建请求和响应对象
+Catalina 一共有四种不同的容器：
+Engine：表示整个 Catalina 的 servlet 引擎
+Host：表示一个有拥有数个上下文的虚拟机
+Context：...
+            </div>
+            <div class="abstract-post-meta">
+                <!-- date  -->
+                <div class="abstract-date">
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2019/03/27</span>
+                </div>
+                <!-- tags  -->
+                
+                <div class= abstract-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = bookworms>bookworms</a>
+    
+</div>
+                
+            </div>
+        </article>
+    
+    
+    
+        <article class="index-post">
+            <a class="abstract-title" href = "/2018/12/31/2018-12-31-把时间当作朋友/" >
+                
+                    <span>把时间当作朋友</span>
+            </a>
+            <div class="abstract-content">
+                把时间当作朋友 | 8.5
+困境
+
+
+既勤奋又懒惰
+2019年来了，你2018年的清单完成了吗？
+
+
+醒悟
+
+
+我们无法管理时间。我们真正能够管理的，是我们自己。只有接受这个简单的事实，才有解决问题的希望。时间是不可以管理的，问题出在自身
+
+
+现实 - 了解自己
+
+
+自己 ： 知 不知；
+别人知道自己的： 知 不知
+心智不强，才导致我根本没有意识到自己只不过是懒惰，甚至振振有词、洋洋自得。最要命的是，我与原本可能的巨大收获一再错过，却又毫不自知。可怕！
+
+
+管理
+
+
+估计时间 因人而异
+及时行动 只要开始就会有结束的一天，不开始永远到达不了终点
+正确的方向
+直面困难
+泡茶的故事
+
+
+思考...
+            </div>
+            <div class="abstract-post-meta">
+                <!-- date  -->
+                <div class="abstract-date">
+                    <span class="abstract-calander iconfont-archer">&#xe676;</span><span class="abstract-time">2018/12/31</span>
+                </div>
+                <!-- tags  -->
+                
+                <div class= abstract-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = bookworms>bookworms</a>
+    
+</div>
+                
+            </div>
+        </article>
+    
+    <!-- paginator  -->
+    
+    <nav class="page-nav">
+        <span class="page-number current">1</span><a class="page-number" href="/archives/page/2/">2</a><a class="page-number" href="/archives/page/3/">3</a><a class="page-number" href="/archives/page/4/">4</a><a class="extend next" rel="next" href="/archives/page/2/">NEXT &#62;</a>
+    </nav>
+    
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+    
+        
+            
+                <a href="//github.com/oopstorm" class="iconfont-archer github" target="_blank" title=github></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- 不蒜子  -->
+    
+    <div class="busuanzi-container">
+        <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span>
+        </span>
+    </div>
+    
+</footer>
+    </div>
+    <!-- toc -->
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-archive"> Total : 40 </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> 2019 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/31</span><a class="archive-post-title" href= "/2019/07/31/2019-07-31-java-performance/" >Java 性能权威指南</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/11</span><a class="archive-post-title" href= "/2019/06/11/2019-06-11-Selenium-IDE-构建自动化测试/" >Selenium IDE 构建自动化测试</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/03</span><a class="archive-post-title" href= "/2019/06/03/2019-06-03-Selenium2自动化测试实战/" >Selenium 2 自动化测试实战 基于Python语言</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/30</span><a class="archive-post-title" href= "/2019/05/30/2019-05-30-java核心技术卷-基础知识/" >java核心技术卷-基础知识</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/29</span><a class="archive-post-title" href= "/2019/05/29/2019-05-29-Head-First-SQL/" >Head First SQL</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/28</span><a class="archive-post-title" href= "/2019/05/28/2019-05-28-影响力/" >影响力</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/27</span><a class="archive-post-title" href= "/2019/05/27/2019-05-27-devops故障排除/" >devops故障排除</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/26</span><a class="archive-post-title" href= "/2019/05/26/2019-05-26-spring-cloud-microservice/" >Spring Cloud 微服务实战</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/27</span><a class="archive-post-title" href= "/2019/03/27/2019-03-27-how-tomcat-works/" >How Tomcat Works</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2018 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/31</span><a class="archive-post-title" href= "/2018/12/31/2018-12-31-把时间当作朋友/" >把时间当作朋友</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/30</span><a class="archive-post-title" href= "/2018/12/30/2018-12-30-beautiful-math/" >数学之美</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/05</span><a class="archive-post-title" href= "/2018/11/05/2018-11-05-tensorflow实战/" >Tensorflow：实战Google深度学习框架</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/29</span><a class="archive-post-title" href= "/2018/10/29/2018-10-29-When-Used-Mongo/" >什么时候用Mongo</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/25</span><a class="archive-post-title" href= "/2018/10/25/2018-10-25-用户调研及存储用户模型方法之分享篇/" >用户调研及存储用户模型之分享篇</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/20</span><a class="archive-post-title" href= "/2018/10/20/2018-10-20-markdownhere/" >如何将markdown格式无痛转成微信需要的富文本格式</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/19</span><a class="archive-post-title" href= "/2018/10/19/2018-10-19-UX（用户体验）思考方式/" >UX（用户体验）的思考方式</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/15</span><a class="archive-post-title" href= "/2018/10/15/2018-10-15-hackers-and-painters/" >黑客与画家</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/28</span><a class="archive-post-title" href= "/2018/09/28/2018-09-28-flowable-messageEventboundary/" >Flowable消息边界事件</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/27</span><a class="archive-post-title" href= "/2018/09/27/2018-09-27-mongoDB-rep/" >mongoDB4.0副本集讲解及配置</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/03</span><a class="archive-post-title" href= "/2018/09/03/2018-09-03-aboutface4/" >about face 4.0交互设计精髓</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/01</span><a class="archive-post-title" href= "/2018/09/01/2018-09-01-妙笔生花的秘密——商务写作新规则/" >妙笔生花的秘密——商务写作新规则</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/31</span><a class="archive-post-title" href= "/2018/08/31/2018-08-31-ci-need-to-build/" >git gradle持续集成按需构建</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/30</span><a class="archive-post-title" href= "/2018/08/30/2018-08-30-flowable-dataobject/" >Flowable DataObject的使用(flowable自定义流程标题)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/31</span><a class="archive-post-title" href= "/2018/07/31/2018-07-31-flowable-skip/" >Flowable SKIP</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/30</span><a class="archive-post-title" href= "/2018/07/30/2018-07-30-flowable-file-Interpretation/" >Flowable中的几个重要字段</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/29</span><a class="archive-post-title" href= "/2018/07/29/2018-07-29-java-8-in-action/" >Java 8 in Action</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/08</span><a class="archive-post-title" href= "/2018/07/08/2018-07-08-深入理解Java虚拟机/" >深入理解Java虚拟机:JVM高级特性与最佳实践(第2版)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/06</span><a class="archive-post-title" href= "/2018/07/06/2018-07-06-Spring-in-Action/" >Spring in Action</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/05</span><a class="archive-post-title" href= "/2018/07/05/2018-07-05-NPDP/" >产品经理认证（NPDP）知识体系指南</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/04</span><a class="archive-post-title" href= "/2018/07/04/2018-07-04-在你身边，为你设计/" >在你身边，为你设计</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/15</span><a class="archive-post-title" href= "/2018/05/15/2018-05-15-liquibase-with-gradle/" >Using Liquibase with Gradle in Spring Project</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/10</span><a class="archive-post-title" href= "/2018/04/10/2018-04-10-clean-code/" >代码整洁之道</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/09</span><a class="archive-post-title" href= "/2018/04/09/2018-04-09-Spring4.x-enterprise-application-development-real-battle/" >Spring 4.X 企业应用开发实战</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/08</span><a class="archive-post-title" href= "/2018/04/08/2018-04-08-how-to-win-friends-and-influence-people/" >人性的弱点</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/07</span><a class="archive-post-title" href= "/2018/04/07/2018-04-07-everyone-is-a-pm/" >人人都是产品经理</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/06</span><a class="archive-post-title" href= "/2018/04/06/2018-04-06-the-elements-of-user-experience/" >用户体验要素</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/05</span><a class="archive-post-title" href= "/2018/04/05/2018-04-05-head-first-design-patterns/" >Head First Design Patterns</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/04</span><a class="archive-post-title" href= "/2018/04/04/2018-04-04-7-languages-in-7-weeks/" >七周其语言：理解多种编程泛型</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/03</span><a class="archive-post-title" href= "/2018/04/03/2018-04-03-http/" >图解 HTTP</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/02</span><a class="archive-post-title" href= "/2018/04/02/hello-world/" >Hello World</a>
+        </li>
+    
+    </div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="bookworms"><span class="iconfont-archer">&#xe606;</span>bookworms</span>
+    
+        <span class="sidebar-tag-name" data-tags="Liquibase"><span class="iconfont-archer">&#xe606;</span>Liquibase</span>
+    
+        <span class="sidebar-tag-name" data-tags="Spring"><span class="iconfont-archer">&#xe606;</span>Spring</span>
+    
+        <span class="sidebar-tag-name" data-tags="Gradle"><span class="iconfont-archer">&#xe606;</span>Gradle</span>
+    
+        <span class="sidebar-tag-name" data-tags="workflow"><span class="iconfont-archer">&#xe606;</span>workflow</span>
+    
+        <span class="sidebar-tag-name" data-tags="mongoDB"><span class="iconfont-archer">&#xe606;</span>mongoDB</span>
+    
+        <span class="sidebar-tag-name" data-tags="用户体验"><span class="iconfont-archer">&#xe606;</span>用户体验</span>
+    
+        <span class="sidebar-tag-name" data-tags="tools"><span class="iconfont-archer">&#xe606;</span>tools</span>
+    
+        <span class="sidebar-tag-name" data-tags="用户体验 产品设计"><span class="iconfont-archer">&#xe606;</span>用户体验 产品设计</span>
+    
+        <span class="sidebar-tag-name" data-tags="mongo"><span class="iconfont-archer">&#xe606;</span>mongo</span>
+    
+        <span class="sidebar-tag-name" data-tags="Tensorflow 深度学习"><span class="iconfont-archer">&#xe606;</span>Tensorflow 深度学习</span>
+    
+        <span class="sidebar-tag-name" data-tags="Selenium Selenium2 自动化测试"><span class="iconfont-archer">&#xe606;</span>Selenium Selenium2 自动化测试</span>
+    
+        <span class="sidebar-tag-name" data-tags="Selenium IDE 自动化测试"><span class="iconfont-archer">&#xe606;</span>Selenium IDE 自动化测试</span>
+    
+        <span class="sidebar-tag-name" data-tags="随笔"><span class="iconfont-archer">&#xe606;</span>随笔</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br/>
+    1、请确保node版本大于6.2<br/>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br/>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br/>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: '/',
+        author: 'John Doe'
+    }
+</script>
+    <!-- busuanzi  -->
+    
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+    </body>
+</html>
+
+

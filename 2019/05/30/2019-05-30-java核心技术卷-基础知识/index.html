@@ -1,0 +1,1684 @@
+<!DOCTYPE html>
+<html>
+    <!-- title -->
+
+
+
+
+
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>java核心技术卷-基础知识 · OopStorm</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+        box-shadow: 0 0 3px 0 rgba(0, 0, 0, 0.7);
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s 1;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href="/css/style.css?v=20180311" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="stylesheet" type="text/css" href="/css/mobile.css?v=20180311" media="(max-width: 980px)">
+    <link rel="icon" href="/assets/favicon.ico">
+    <script>
+  // load webfont-loader async, and add callback function
+  function async(u, c) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+  
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntroTags = document.getElementsByClassName('post-intro-tags')[0],
+        postIntroMeat = document.getElementsByClassName('post-intro-meta')[0];
+      if (postIntroTags) {
+        postIntroTags.classList.add('post-fade-in');
+      }
+      if (postIntroMeat) {
+        postIntroMeat.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  async("https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", asyncCb)
+</script>
+    <script>
+        (function (w) {
+            "use strict";
+            // rel=preload support test
+            if (!w.loadCSS) {
+                w.loadCSS = function () { };
+            }
+            // define on the loadCSS obj
+            var rp = loadCSS.relpreload = {};
+            // rel=preload feature support test
+            // runs once and returns a function for compat purposes
+            rp.support = (function () {
+                var ret;
+                try {
+                    ret = w.document.createElement("link").relList.supports("preload");
+                } catch (e) {
+                    ret = false;
+                }
+                return function () {
+                    return ret;
+                };
+            })();
+
+            // if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+            // then change that media back to its intended value on load
+            rp.bindMediaToggle = function (link) {
+                // remember existing media attr for ultimate state, or default to 'all'
+                var finalMedia = link.media || "all";
+
+                function enableStylesheet() {
+                    link.media = finalMedia;
+                }
+
+                // bind load handlers to enable media
+                if (link.addEventListener) {
+                    link.addEventListener("load", enableStylesheet);
+                } else if (link.attachEvent) {
+                    link.attachEvent("onload", enableStylesheet);
+                }
+
+                // Set rel and non-applicable media type to start an async request
+                // note: timeout allows this to happen async to let rendering continue in IE
+                setTimeout(function () {
+                    link.rel = "stylesheet";
+                    link.media = "only x";
+                });
+                // also enable media after 3 seconds,
+                // which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+                setTimeout(enableStylesheet, 3000);
+            };
+
+            // loop through link elements in DOM
+            rp.poly = function () {
+                // double check this to prevent external calls from running
+                if (rp.support()) {
+                    return;
+                }
+                var links = w.document.getElementsByTagName("link");
+                for (var i = 0; i < links.length; i++) {
+                    var link = links[i];
+                    // qualify links to those with rel=preload and as=style attrs
+                    if (link.rel === "preload" && link.getAttribute("as") === "style" && !link.getAttribute("data-loadcss")) {
+                        // prevent rerunning on link
+                        link.setAttribute("data-loadcss", true);
+                        // bind listeners to toggle media back
+                        rp.bindMediaToggle(link);
+                    }
+                }
+            };
+
+            // if unsupported, run the polyfill
+            if (!rp.support()) {
+                // run once at least
+                rp.poly();
+
+                // rerun poly on an interval until onload
+                var run = w.setInterval(rp.poly, 500);
+                if (w.addEventListener) {
+                    w.addEventListener("load", function () {
+                        rp.poly();
+                        w.clearInterval(run);
+                    });
+                } else if (w.attachEvent) {
+                    w.attachEvent("onload", function () {
+                        rp.poly();
+                        w.clearInterval(run);
+                    });
+                }
+            }
+            // commonjs
+            if (typeof exports !== "undefined") {
+                exports.loadCSS = loadCSS;
+            }
+            else {
+                w.loadCSS = loadCSS;
+            }
+        }(typeof global !== "undefined" ? global : this));
+    </script>
+    <script src="//cdn.staticfile.org/jquery/3.2.1/jquery.min.js" defer></script>
+    <script src="/scripts/main.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+</head>
+
+    
+        <body class="post-body">
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/" >OopStorm</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">java核心技术卷-基础知识</a>
+            </div>
+    </div>
+    
+    <a class="home-link" href=/>OopStorm</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style=
+
+
+
+
+
+
+
+
+height:50vh;
+
+>
+    
+    <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
+            
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg.jpg)"></div>
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+            java核心技术卷-基础知识
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+            
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+            <!-- 文章页标签  -->
+            
+                <div class= post-intro-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = bookworms>bookworms</a>
+    
+</div>
+            
+            <div class="post-intro-meta">
+                <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                <span class="post-intro-time">2019/05/30</span>
+                
+                <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                    <span class="iconfont-archer">&#xe602;</span>
+                    <span id="busuanzi_value_page_pv"></span>
+                </span>
+                
+                <span class="shareWrapper">
+                    <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                    <span class="shareText">Share</span>
+                    <ul class="shareList">
+                        <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                            <div class="share-qrcode"></div>
+                        </li>
+                        <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                        <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                        <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                        <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                    </ul>
+                </span>
+            </div>
+        
+    </div>
+</div>
+        <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+
+        <div class="container container-unloaded">
+            <main class="main post-page">
+    <article class="article-entry">
+        <h2 id="java核心技术卷-基础知识-8-0"><a href="#java核心技术卷-基础知识-8-0" class="headerlink" title="java核心技术卷-基础知识 | 8.0"></a>java核心技术卷-基础知识 | <a href="https://book.douban.com/subject/26880667/" target="_blank" rel="noopener">8.0</a></h2><ul>
+<li>类之间的关系:</li>
+</ul>
+<ul>
+<li>依赖:    (user-a)<pre><code>一个类的方法操纵另一个类的对象。
+</code></pre></li>
+<li>聚合:    (has-a)[关联]<pre><code>类A的对象包含类B的对象
+</code></pre></li>
+<li><p>继承:    (is-a)</p>
+<pre><code>类A扩展类B，类A不但包含从类B继承的方法，还会拥有一些额外的功能
+</code></pre></li>
+<li><p>对象</p>
+<pre><code>要想使用对象，就必须首先构造对象，并指定其初始状态。
+</code></pre></li>
+<li>构造器<pre><code>构造器与类同名
+每个类可以有一个以上的构造器
+构造器可以有多个参数
+构造器没有返回值
+构造器伴随new操作一起调用
+</code></pre></li>
+</ul>
+<p>-隐式参数与显式参数<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">public void reaiseSalary(double byPercent) &#123;</span><br><span class="line">    double raise = this.salary * byPercent /100</span><br><span class="line">    this.salary += raise</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<ul>
+<li><p>final实例域</p>
+<pre><code>构建时必须初始化这样的域，之后不能被修改
+</code></pre></li>
+<li><p>静态域<br>如果将域定义为static，每个类只有一个这样的域。而每一个对象对于所有的实例域都有自己的一份拷贝。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">private static int nextId = 1;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>静态常量</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">public static final double PI = 3.1415926</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>静态方法</p>
+<pre><code>是一种不能向对象实施操作的方法。例如Math类的pow方法
+Math.pow(x, a)   运算时，不使用任何Math对象，换句话说，没有隐式参数
+静态方法可以访问自身类中的静态域 
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public static int getNextId() &#123;</span><br><span class="line">    return nextId;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</code></pre></li>
+<li><p>方法</p>
+<pre><code>所有的方法定义在类内
+用于操作对象以及存取他们的实例域
+</code></pre></li>
+<li><p>方法参数</p>
+<pre><code>按值调用，方法得到的是所有参数值的一个拷贝
+一个方法不能修改一个基本数据类型的对象
+一个方法可以改变一个对象参数的状态
+一个方法不能让对象参数引用一个新的对象
+</code></pre></li>
+<li><p>初始化数据域方法</p>
+<pre><code>1.在构造器中设置值
+2.在声明中赋值
+3.初始化块
+</code></pre></li>
+<li><p>参数名</p>
+<pre><code>参数变量用同样的名字将实例域屏蔽起来，采用this.的形式访问实例域。this指示隐式参数，也就是所构造的对象。
+</code></pre></li>
+<li><p>对象构造</p>
+<pre><code>重载
+        多个方法有相同的名字，不同的参数，变产生了重载
+</code></pre></li>
+<li><p>对象析构与finalize方法</p>
+<pre><code>析构器最常见的操作是回收分配给对象的存储空间，由于java有自动的垃圾回收器，不需要人工回收内存。
+如果某些对象使用了内存之外的其他资源，当资源不需要时，将其回收十分重要
+可以为任何一个类添加finalize方法，finalize方法将在垃圾回收器清楚对象之前调用。
+</code></pre></li>
+<li><p>包</p>
+<pre><code>Java允许使用包将类组织起来，借助于包可以方便地组织自己的代码，并将自己的代码与别人提供的代码库分开管理
+</code></pre></li>
+<li><p>类的导入</p>
+<pre><code>一个类可以使用所属包中的所有类，以及其他包中的公有类
+import  java.util.*; 加载java.util中的所有类
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Import java.time.LocalDate;</span><br><span class="line">Ex: localDate today = localDate.now();</span><br></pre></td></tr></table></figure>
+</code></pre></li>
+</ul>
+<pre><code>Java.util和java.sql包都有Date类，如果同时使用，在每个类前面加上完整的包名
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java.util.Date deadline = new java.util.Date();</span><br></pre></td></tr></table></figure>
+</code></pre><ul>
+<li><p>静态导入</p>
+<pre><code>import语句不仅可以导入类，还增加了导入静态方法和静态域的功能
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Import static java.lang.System.*</span><br></pre></td></tr></table></figure>
+
+就可以使用System类的静态方法和静态域，而不必加类名前缀
+</code></pre></li>
+<li><p>将类放入包中</p>
+<pre><code>要想将一个类放入包中，就必须将包的名字放在源文件的开头，包中定义类的代码之前。
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Package com.horstmann.corejava</span><br></pre></td></tr></table></figure>
+
+如果没有在源文件中放置package语句，这个源文件中的类就被放置在一个默认包中
+将包中的文件放到与完整的包名匹配的子目录中（com/horstmann/corejava）
+</code></pre></li>
+<li><p>包的作用域</p>
+<pre><code>标记为private的部分只能被定义它们的类使用
+标记为public的部分可以被任意的类使用
+如果没有指定public或private，这个部分可以被同一个包中的所有方法访问
+</code></pre></li>
+<li><p>类路径</p>
+<pre><code>类的路径必须与包名匹配
+为了使类能够被多个程序共享，需要做到下面几点
+1.把类放到一个目录中，例如/home/user/classdir。需要注意，这个目录是包树状结构的基目录。如果希望将com.horstmann.corejava.Employee类添加其中，这个Employee.class类文件就必须位于子目录/home/user/classdir/com/horstmann/corejava中
+2.将JAR文件放在一个目录中,例如: /home/user/archives。
+3.设置类路径。类路径是所有包含类文件的路径的集合
+ c : \ classdir ; . ; c : \ archives \ archive . j ar
+</code></pre></li>
+<li><p>文档注释</p>
+<pre><code>javadoc 实用程序 （ utility ) 从下面几个特性中抽取信息 ：
+? 包
+? 公有类与接口
+? 公有的和受保护的构造器及方法
+?公有的和受保护的域
+</code></pre></li>
+<li><p>类注释</p>
+<pre><code>类注释必须放在 import 语句之后 ， 类定义之前 。
+</code></pre></li>
+<li><p>方法注释</p>
+<pre><code>每一个方法注释必须放在所描述的方法之前
+除了通用标记之外 ， 还可以使用下面的标记 ：
+? @ param 变量描述
+这个标记将对当前方法的 “ param ” （ 参数 ） 部分添加一个条目 。 这个描述可以占据多行 ， 并可以使用 HTML 标记 一个方法的所有@param 标记必须放在一起
+? @ return 描述
+这个标记将对当前方法添加 “ return ” （ 返回 ） 部分，这个描述可以跨越多行 ， 并可以使用 HTML 标记
+? ? throws 类描述
+这个标记将添加一个注释 ， 用于表示这个方法有可能抛出异常 。 
+</code></pre></li>
+<li><p>还有域注释(静态常量)，通用注释</p>
+</li>
+<li><p>类设计的技巧</p>
+<pre><code>1.一定要保证数据私有(不要破坏封装性)
+2.一定要对数据初始化(不要依赖于系统的默认值，应该显式的初始化)
+3.不要在类中使用过多的基本类型(用其他的类代替多个相关的基本类型的使用)
+4.不是所有的域都需要独立的域访问器和域更改器
+5.将职责过多的类进行分解
+6.类名和方法名要能够体现他们的职责(形容词修饰名词)
+7.优先使用不可变得类
+</code></pre></li>
+<li><p>继承</p>
+<pre><code>- 定义子类
+        下面是由继承 Employee 类来定义 Manager 类的格式 ， 关键字 extends 表示继承
+        public class Manager extends Employee
+        已存在的类为超类,父类，新类为子类 
+        设计类时通用的方法放在超类，特殊用途的方法放在子类
+
+- 覆盖方法
+        超类中的有些方法对子类不一定适用，需要提供一个方法来覆盖超类中的这个方法
+        public double getSalary() {
+            double baseSalary = super.getSalary();
+            return baseSalary + bonus;
+         }
+
+- 子类构造器
+        public Manager ( String name , double salary , int year , int month , int day )
+        {
+            super ( name , salary , year , month , day ) ;
+            bonus = 0 ;
+         }
+        由于 Manager 类的构造器不能访问 Employee 类的私有域 ， 所以必须利用Employee 类的构造器对这部分私有域进行初始化,我们可以通过 super 实现对超类构造器的调用使用super 调用构造器的语句必须是子类构造器的第一条语句 。
+
+- 继承层次
+         由一个公共超类派生出来的所有类的集合被称为继承层次
+
+- 多态
+        对象变量是多态的，既可以引用一个超类对象，也可以引用超类的任何一个子类的对象
+        <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Manager boss = new Manager(...);</span><br><span class="line">Emplyee[] staff = new Employee[3];</span><br><span class="line">staff[0] = boss;</span><br></pre></td></tr></table></figure>
+
+        例子中，变量staff[0]与boss引用同一个对象，但编译器将staff[0]看成Employee对象
+        <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">boss.setBouns(500)  Ok</span><br><span class="line">staff[0].setBouns(500); Error</span><br></pre></td></tr></table></figure>
+
+        这是因为staff[0]声明类型是Employee
+        不可以将超类的引用赋给子类
+
+- 多态的实现
+        java实现多态有三个必要条件: 继承，重写，向上转型   
+        <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Wine a = new JNC();</span><br></pre></td></tr></table></figure>
+
+       这里定义了一个Wine 类型的a，它指向JNC对象实例。由于JNC是继承与Wine，所以JNC可以自动向上转型为Wine，所以a是可以指向JNC实例对象的
+
+(理解方法调用)
+
+- 阻止继承: final类和方法
+        不允许扩展的类被称为final类，final类的所有方法自动称为final方法，方法被声明为final，子类就不能覆盖这个方法
+
+- 强制类型转换
+        <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">double x = 3.405;</span><br><span class="line">int nx = (int) x;</span><br></pre></td></tr></table></figure>
+
+        将一个超类的引用赋给一个子类变量，必须进行类型转换
+        进行类型转换的原因，在暂时忽视对象的实际类型之后，使用对象的全部功能
+        只能在继承层次内进行类型转换
+        在将超类转换成子类之前 ， 应该使用instanceof 进行检查
+        <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">if (staff[1] instanceof Manager) &#123;</span><br><span class="line">    boss = (Manager) staff[1]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+         instanceof 可以在继承关系中用来判断一个实例是否属于它的父类型
+
+- 抽象类
+        位于上层的类更具通用性，更加抽象。祖先类作为派生其他类的基类，而不作为使用的特定实例类。例如雇员是一个人，学生是一个人，person为超类，他们为子类，每个人都有姓名属性，所以将getName放入更高层次的类中，增加一个getDescription方法，返回一个人的描述，在子类中实现很容易，但是在超类Person中不知道提供什么内容，只是知道名字。使用abstract关键字，就不需要实现这个方法。
+        包含一个或多个抽象方法的类本身必须声明为抽象类
+        <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public abstract class Person &#123;</span><br><span class="line">    public abstract String getDescription();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+        除了抽象方法之外，抽象类还可以包含具体数据和具体方法
+        抽象方法充当占位的角色，具体实现在子类中。扩展抽象类可以有两种选择。一种在抽象类中定义部分抽象类方法或不定义抽象类方法，这样就必须将子类也标记为抽象类。另一种是定义全部的抽象方法，这样子类就不是抽象类了。
+        抽象类不能被实例化
+
+- 受保护访问
+        最好类中的域标记为private,而方法标记为public，声明为private，子类也不能访问超类的私有域，当希望超类中的某些方法被子类访问，需要将方法或域声明为protected
+</code></pre></li>
+<li><p>Object: 所有类的超类</p>
+<pre><code>除了基本类型不是对象。
+
+- equals方法
+        用来检测一个对象是否等于另外一个对象。这个方法判断两个对象是否具有相同的引用。对于多数类来说这种判断并没有什么意义(在实际的雇佣数据库中，比较ID更有意义)
+
+- hashCode方法
+        散列码是由对象导出的一个整型值
+        每个对象都有一个默认的散列码，其值为对象的存储地址
+
+- toString方法
+        用于返回表示对象值得字符串
+        只要对象与一个字符串通过操作符+连接起来，java编译会自动地调用toString方法，以便获得这个对象的字符串描述
+</code></pre></li>
+<li><p>泛型数组列表</p>
+<pre><code>- ArrayList使用起来有点像数组，但在添加或删除元素时，具有自动调节数组容量的功能，而不需要为此编写任何代码。
+- ArrayList是一个采用类型参数的泛型类。为了制定数组列表保存的元素对象类型，需要用一对尖括号将类名括起来加在后面。
+        <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ArrayList&lt;Employee&gt; staff = new ArrayList&lt;Employee&gt;();</span><br><span class="line">ArrayList&lt;Employee&gt; staff = new ArrayList&lt;&gt;();</span><br></pre></td></tr></table></figure>
+
+        使用add方法将元素添加到数组列表中
+        <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">staff.add(new Employee(&quot;hary&quot;,...));</span><br><span class="line">staff.add(n, e); // 在数组列表中间插入元素，使用带索引的add</span><br></pre></td></tr></table></figure>
+
+        返回数组列表中包含的实际元素数目
+        <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">staff.size();</span><br></pre></td></tr></table></figure>
+
+        一旦确定数组大小不在发生变化，可以调用trimToSize方法，将存储区域的大小调整为当前元素数量所需要的存储空间数目
+
+- 访问数组元素
+        使用get和set方法实现访问或改变数据元素的操作
+        staff.set(i, harry); 等价于 a[i] = harry
+        只有i小于或等于数据列表的大小时，才能够调用list.set(i, x);
+        set只能替换数组中已经存在的元素内容
+        Employee e = staff.get(i) 等价于 Employee e = a[i];
+        staff.remove(n) 从数组列表中删除一个元素
+</code></pre></li>
+<li><p>对象包装器与自动装箱</p>
+<pre><code>有时候需要将int这样的基本类型转换为对象。所有的基本类型都有一个与之对应的类
+定义一个整型数组列表，而尖括号中的类型参数不予许是基本类型，ArrayList&lt;int&gt;, 用Integer对象包装器
+ArrayList&lt;Integer&gt; list = new Arraylist&lt;&gt;();
+有一个很有用的特性,从而更加便于添加int类型的元素到ArrayList&lt;Integer&gt;中
+调用 list.add(3);  将自动地变成  list.add(Integer.valueOf(3)); 这种变换被称为自动装箱
+</code></pre></li>
+<li><p>参数数量可变的方法</p>
+<pre><code>public PrintStream printf(String fmt, Object... args)
+省略号...是java代码的一部分，表明这个 方法可以接受任意数量的对象(除fmt参数之外)
+</code></pre></li>
+<li><p>枚举类</p>
+<pre><code>查看定义枚举类型
+public enum Size { SMALL, MEDIUM, LARGE, EXTRA_LARGE }
+比较枚举类型值, 不需要调用equals 而直接使用 ==
+toString 返回枚举常量名   toString的逆方法是静态方法valueOf
+每个枚举类型都有一个静态的values方法，它将返回一个包含全部枚举值得数组
+Size[] values = Size.values();
+valueOf 返回指定名字，给定类的枚举常量
+ordinal() 返回枚举常量在enum声明中的位置，位置从0开始
+compareTo() 枚举常量在other之前，返回负值，this===other 返回0，否则返回正值
+</code></pre></li>
+<li><p>继承的设计技巧</p>
+<pre><code>将公共操作和域放在超类
+不要使用受保护的域(同一个包中所有类都可以访问 protected，子类集合无限制，都能派生子类，直接访问protected的实例域)
+使用继承实现is-a关系
+除非所有继承的方法都有意义，否则不要使用继承
+在覆盖方法时，不要改变预期的行为
+使用多态，而非类型信息(if else 定义方法，放置在两个类的超类和接口中，以便使用多态性提供的动态分派机制执行相应操作)
+不要过多地使用反射
+</code></pre></li>
+<li><p>接口</p>
+<pre><code>- 接口不是类，是对类的一组需求描述，这些类要遵从接口描述的统一格式进行定义
+- 接口中所有方法自动地属于public，因此接口声明方法时，不必提供关键字Public
+- 接口中可以定义常量，接口绝不能含有实例域，提供实例域和方法实现的任务应该由实现接口的那个类完成。因此可以将接口看成是没有实例域的抽象类
+- 让类实现一个接口，通常需要两个步骤
+        1.将类声明为实现给定的接口
+        2.对接口中的所有方法进行定义
+        要声明为实现某个接口，需要使用关键字implements
+        class Employee implements Comparable
+        public int compareTo(Employee other) 实现接口时，必须把方法声明为public
+
+- 接口的特性
+        接口不是类，不能使用new运算符实例化一个接口
+        不能够构造接口对象，却能声明接口变量  Comparable x
+        接口变量必须引用实现了接口的类的对象
+        使用instanceof检查一个对象是否属于某个特定的类，也可以检查是否实现了某个特定接口
+        尽管每个类智能有一个超类，但却可以实现多个接口，比如拥有克隆和比较的能力
+
+- 接口与抽象类
+        使用抽象类表示通用属性存在一个问题，每个类只能扩展一个类，但可以实现多个接口
+
+- 接口与回调
+        回调是一种常见的程序设计模式，可以指出某个特定事件发生时应该采取的动作
+
+- lambda表达式
+        lambda表达式是一个可传递的代码块，可以在以后执行一次或多次
+        lambda表达式形式: 参数,剪头（）-&gt; 表达式
+        无需指定lambda表达式的返回值，返回类型总是会由上下文推导得出
+        lambda表达式只在某些分支返回一个值，而在另外一些分支不返回值是不合法的
+
+- 函数式接口
+        对于只有一个抽象方法的接口，需要这种接口的对象时，就可以提供一个lambda表达式，这种接口方式称为函数式接口
+
+- 方法引用
+        有时，可能现有的方法可以完成你想要传递到其他代码的某个动作。
+        要用::操作符分隔方法名与对象或类名
+        object :: instanceMethod
+        Class : : static Method
+        Class :: instanceMethod
+        前两种情况Math::pow等价于(x,y) -&gt; Math.pow(x, y)
+        第三种情况String : : compareToIgnoreCase 等同于 ( x , y ) - &gt; x . compareToIgnoreCase ( y )
+
+- 构造器引用
+        构造器引用与方法引用类似，只不过方法名为new 例如 Person::new
+
+- 处理lambda表达式
+        使用lambda表达式的重点是延迟执行。立即执行代码，直接执行，无需包装在一个lambda表达式中
+</code></pre></li>
+<li><p>内部类</p>
+<pre><code>内部类是定义在另一个类中的类。使用内部类原因有三点
+1.内部类方法可以访问该类定义所在的作用域中的数据，包括私有的数据
+2.内部类可以对同一个包中的其他类隐藏起来
+3.当想要定义一个回调函数且不想编写大量代码时，使用匿名内部类比较便捷
+</code></pre></li>
+<li><p>内部类的特殊语法规则</p>
+<pre><code>使用外围类引用的语法，表达式 OuterClass.this  TalkingClock.this.keep
+编写内部对象的构造器 outerObject.new InnerClass  ActionListener listener = this.new TimePrinter();
+在外围类作用域之外，引用内部类 OuterClass.InnerClass
+TalkingClock jabberer = new TalkingClock(1000, true);
+TalkingClock.TimePrinter listener = jabberer.new TimePrinter();
+</code></pre></li>
+<li><p>局部内部类</p>
+<pre><code>局部类不能用public或者private访问说明符进行声明，它的作用域被限定在声明这个局部类的块中
+局部类有一个优势，即对外部世界可以完全地隐藏起来，即是外围类中的其他代码也不能访问，除了当前方法外，没有任何方法 知道局部类的存在
+</code></pre></li>
+<li><p>匿名内部类？</p>
+</li>
+<li>局部内部类？</li>
+<li><p>代理？</p>
+</li>
+<li><p>处理错误</p>
+<pre><code>错误类型
+1.用户输入错误
+2.设备错误
+3.物理限制
+4.代码错误
+</code></pre></li>
+<li><p>异常分类</p>
+<pre><code>异常对象都派生于Throwable类的一个实例，Throwable分解为Error和Exception
+Exception分解为RuntimeException和IOException(其他异常)
+RuntimeException:  错误的类型转换
+                                数组访问越界
+                                访问null指针
+其他异常: 试图在文件尾部后面读取数据
+                试图打开一个不存在的文件
+                试图根据给定的字符串查找Class对象，而这个字符串表示的类并不存在
+
+应该通过检测数组下标是否越界来避免 ArraylndexOutOfBoundsException 异常
+应该通过在使用变量之前检测是否为 null 来杜绝 NullPointerException 异常的发生
+</code></pre></li>
+<li><p>抛出异常</p>
+<pre><code>1.找到一个合适的异常类
+2.创建这个类的一个对象
+3.将对象抛出
+    throw new EOFException
+</code></pre></li>
+<li><p>创建异常类</p>
+<pre><code>定义一个派生于Exception的类或者子类，习惯上，定义的类包含两个构造器，一个默认构造器，一个带有详细信息的构造器(超类的toString方法将会打印出这些详细信息)
+class FileFormatException extends IOException {
+    public FileFormatException() { }
+    public FileFormatException(String gripe) {
+        super(gripe);
+    }
+} 
+</code></pre></li>
+<li><p>捕获异常</p>
+<pre><code>要想捕获一个异常，必须设置try/catch语句块
+try {
+    code
+}
+catch ( ExceptionType e )
+{
+    handler for this type
+}
+finally
+{}
+如果在 try 语句块中的任何代码抛出了一个在 catch 子句中说明的异常类 ， 那么程序将跳过 try 语句块的其余代码,程序将执行 catch 子句中的处理器代码
+</code></pre></li>
+<li><p>finally子句</p>
+<pre><code>不管是否有异常被捕获，finally子句中的代码都被执行
+</code></pre></li>
+<li><p>分析堆栈轨迹元素</p>
+<pre><code>堆栈轨迹是一个方法调用过程的列表，他包含了程序执行过程中方法调用的特定位置
+Throwable t = new ThrowableO ;
+StackTraceElement[] frames = t . getStackTrace () ;
+for ( StackTraceElement frame : frames )
+    analyze frame
+</code></pre></li>
+<li><p>基本日志</p>
+<pre><code>生成简单的日志记录，可以使用全局日志记录器
+Logger.getGlobal().info(&quot;...&quot;);
+</code></pre></li>
+<li><p>高级日志</p>
+<pre><code>不要将所有的日志都记录到一个全局日志记录器中，而是可以自定义日志记录器
+private static final Logger myLogger = Logger.getLogger(&quot;com.mycompany.myapp&quot;)
+日志记录级别 SEVERE WARNING INFO CONFIG FINE FINER FINEST。在默认情况下只记录前3个级别
+设置日志级别  logger.setLevel( Level.FINE )
+使用log方法指定级别 logger.log(level.FINE, message);
+记录日志常见用途是记录那些不可预料的异常，可以使用下面两个方法
+IOException exception = new IOException ( &quot; . . . &quot; ) ；
+logger.throwing(&quot;com.mycompany.mylib.Reader &quot; , &quot;read&quot;, exception);
+throw exception
+或者
+catch(IOException e) {
+    Logger.getLogger(&quot;com.mycompany.myapp&quot;).log(level.WARNING, &quot;Reading image&quot;, e);
+}
+</code></pre></li>
+<li><p>修改日志管理器配置</p>
+<pre><code>可以通过编辑配置文件来修改日志系统的各种属性，默认情况，配置文件存在于： jre/lib/logging.properties。要想使用另一个配置文件，就要将java.util.logging.config.file特性设置为配置文件的存储位置，并用命令启动: java -Djava.tuil.logging.config.file=configFile MainClass
+</code></pre></li>
+<li><p>日志消息本地化？</p>
+</li>
+<li><p>日志处理器？</p>
+</li>
+<li><p>日志过滤器？</p>
+</li>
+<li><p>日志格式化器？</p>
+</li>
+<li><p>调试技巧</p>
+<pre><code>一个不太为人所知却很有效的技巧是在每一个类中放置一个单独的main方法。这样就可以对每一个类进行单元测试
+</code></pre></li>
+<li><p>泛型程序设计</p>
+<pre><code>泛型程序设计意味着编写的代码可以被很多不同类型的对象所重用
+</code></pre></li>
+<li><p>定义简单的泛型类</p>
+<pre><code>一个泛型类就是具有一个或多个类型变量的类  public class Pair&lt;T, U&gt;
+用具体的类型替换类型变量就可以实例化泛型类型如  Pair&lt;String&gt;
+</code></pre></li>
+<li><p>泛型方法</p>
+<pre><code>public static &lt;T&gt; T getMiddle(T...a)
+</code></pre></li>
+<li><p>泛型约束及局限性</p>
+<pre><code>1.不能用基本类型实例化类型参数
+2.运行时类型查询只适用于原始类型(虚拟机中的对象总有一个特定的非泛型类型，因此所有查询只产生原始类型) if（a instanceof Pair&lt;String&gt;）//Error
+3.不能创建参数化类型的数组  pair&lt;String&gt;[] table = new Pair&lt;String&gt;[10]  // Error
+    类型擦除后，table的类型是Pair[]可以把它转换为Object[] obj[0] = &quot;hello&quot;  // Error
+4.Varargs警告，java不支持泛型类型的数组
+5.不能实例化类型变量   new T(..)
+6.不能构造泛型数组。 数组本身也有类型，监控存储在虚拟机中的数组。这个类型会被擦除
+7.泛型类的静态上下文中类型变量无效  public static T singleInstance // Error
+8.不能抛出和捕获泛型类对象 catch(T e)  T extends Exception //  Error
+9.可以消除对受查异常的检查
+10.注意擦除后的冲突，当泛型被擦除时，无法创建引发冲突的条件
+</code></pre></li>
+<li><p>泛型类型的继承规则</p>
+<pre><code>Pair&lt;Manager&gt;和Pair&lt;Employee&gt; 不是子类
+</code></pre></li>
+<li><p>通配符类型</p>
+<pre><code>固定的泛型类型系统使用起来并不愉快，java发明了巧妙的解决方案
+通配符类型中，允许类型参数变化  Pair&lt;? extends Employee&gt;
+表示任何泛型Pair类型, 它的类型参数是Employee的子类
+</code></pre></li>
+<li><p>通配符的超类型限定</p>
+<pre><code>通配符限定与类型变量限定十分 类似，还有一个附加的能力，即可以指定一个超类型限定 
+? super Manager
+这个通配符限制为Manager的所有超类型
+</code></pre></li>
+<li><p>集合</p>
+<pre><code>队列  先进先出
+队列通常有两种实现方式  1.使用循环数组  2.使用链表
+循环数组是一个有界集合，即容量有限。如果程序要收集的对象数量没有上限，就最好用链表实现
+
+collection接口
+        集合类的基本接口是Collection接口
+        add方法用于向集合添加元素 如果添加元素确实改变了集合就返回true,没有就返回false，集合中不允许有重复对象
+        iterator方法用于返回一个实现了Iterator接口的对象，可以使用这个迭代器对象依次访问集合中的元素
+
+迭代器
+        Iterator接口包含四个方法
+        通过调用next方法，逐个访问集合中的子元素，到达末尾，next方法抛出一个NoSuchElementException，因此 需要在调用next之前调用hasNext方法
+        用for each循环可以更加简单的调试循环操作,编译器简单地将for each循环翻译为带有迭代器的循环
+        for (String element : c)
+        对ArrayList进行迭代，迭代器从索引0开始，访问HashSet中元素，每个元素将会按照某种随机次序出现
+        java迭代器认为位于两个元素之间，当调用next，迭代器就越过下一个元素，并返回越过的元素的引用
+        Iterator接口的remove方法将会删除上次调用next方法时返回的元素，
+
+泛型使用方法
+        由于Collection和Iterator都是泛型接口，可以编写操作任何集合类型的使用方法
+        int Size()
+        boolean isEmpty()
+        boolean contains(Object obj)
+        boolean equals(Object other)
+        boolean addAll(Collection&lt;?&gt; c）
+        boolean remove(Object obj)
+        void clean()   ...
+        实现Collection接口的每一个类都要提供如此多的方法很烦，为了容易使用，提供了一个类AbstractCollect
+
+集合框架中的接口
+        java集合框架为不同类型的集合定义了大量接口
+        插入元素 boolean add(E element) 不过，由于键/值对，所以要用put方法来插入:
+        V put(K key, V value)要从集合中读取元素，可以用迭代器访问元素，从映射中读取用get方法
+        V get(K key)
+        List是一个有序集合，元素会增加到容器中的特定位置，使用迭代器访问，或者一个整数的索引访问
+        ListIterator接口时Iterator的一个子接口，add方法用于在迭代器位置前面增加一个元素
+        Set接口等同于Collection接口，集(set)的add方法不允许增加重复的元素，要适当的定义equals方法，只要包含同样的元素就认为是相等的，而不要求有同样的顺序。
+        概念上讲，并不是所有集合都是集
+</code></pre><p>  具体的集合</p>
+</li>
+</ul>
+<ul>
+<li>链表<pre><code>数组和数组列表有一个重大缺陷，就是从数组的中间位置删除一个元素付出很大的代价，删除/添加元素后所有之后的所有元素都要前/后移动。链表解决了这种问题
+链表都是双向链接的
+</code></pre></li>
+</ul>
+<pre><code>链表是一个有序集合，LinkedList.add方法将对象添加到链表尾部，常常需要将元素添加到中间，所以这种依赖于位置的add方法将由迭代器负责
+
+数组列表
+        List接口用于描述一个有序集合，有两种访问协议，一种迭代器，一种能够get set随机访问，集合类库提供了ArrayList类，这个类也实现了List接口
+
+散列集
+        可以快速地查找所需要的对象，这就是散列集。散列集为每个对象计算一个整数，称为散列码，散列码由对象的实例域产生的一个整数，具有不同数据域的对象将产生不同的散列码
+        java提供了一个HashSet类，它实现了基于散列表的集
+
+树集
+        是一个有序集合，可以任意顺序将元素插入集合中，对元素遍历时，每个值将自动地按照排序后的顺序呈现。(元素自动排序)
+
+双端队列 (Deque接口)，可以让人有效地在头部和尾部同时添加或删除元素，不支持在中间添加元素
+
+优先级队列
+        优先级队列中的元素可以按照任意的顺序插入，却总按照排序的顺序进行检索，无论何时调用remove方法，总会获得当前优先级队列中最小的元素，优先级队列使用了一个 优雅且高效的数据结构，称为堆。
+        堆是一个可以自我调整的二叉树，对树执行添加和删除操作，可以让 最小的元素移动到根
+</code></pre><ul>
+<li><p>映射</p>
+<pre><code>通常我们知道某些健的信息，并想要查找与之对应的元素。映射数据结构就是为此设计，映射用来存放键/值对，如果提供了键就能查找到值
+java类库为映射提供了两个 通用实现，HashMap和TreeMap，这两个类都实现了Map接口
+与集一样，如果不需要排列顺序访问键，就最好选择散列
+Map&lt;String , Employee&gt; staff = new HashMap &lt;&gt; ( )
+get  put  remove 
+要迭代处理映射的键和值,最容易的方法是使用forEach方法，可以提供一个接受键值得lambda表达式
+scores.forEach ( ( k , v ) - &gt;
+    System . out . println ( &quot; key = &quot; + k + &quot; , value : &quot; + v ))
+</code></pre></li>
+<li><p>视图与包装器</p>
+</li>
+<li><p>轻量级集合包装器</p>
+<pre><code>Arrays类的静态方法asList将返回一个包装了普通java数组的List包装器，这个 方法可以将数组传递给一个 期望得到列表或集合参数的方法
+</code></pre><p>  Card[ ] cardOeck = new Card[52]<br>  List<card> cardList = Arrays.asList (cardDeck) :</card></p>
+</li>
+<li><p>子范围</p>
+<pre><code>可以为很多集合建立子范围，假设有个列表staff，想从中取出第10-19个元素
+List group = staff.subList (10 , 20)  第一个索引包含在内，第二个索引不包含在内
+</code></pre></li>
+<li><p>算法</p>
+<pre><code>排序与混排
+        Collection类中的sort方法可以实现了List接口的集合进行排序，降序排序Collectitons.reverseOrder
+        Collection类中的shuffle,功能与排序相反，即随机地混排列表中元素的顺序
+
+二分查找
+        Collection类的binarySearch方法。集合必须是拍好序的。返回负值，则没有匹配的元素，大于等于0，则表示匹配对象的索引。如果集合没有采用Comparable接口的compareTo方法进行排序，就还要提供一个比较器对象。
+
+简单算法
+        min最小值
+        max最大值
+        copy负值所有元素到目标
+        fill将列表中所有位置设置为相同的值
+        addAll 将所有值添加到集合中，如果集合改变 返回true
+        replaceAll用newValue取代所有值为oldValue的元素
+        swap交换给定偏移量的两个元素
+        reverse逆置列表中元素的顺序
+        rotate旋转列表中的元素，将索引i的条目移动到位置(i+d)%I.size
+        disjoint 如果两个集合没有共同的元素，则返回true
+        removeIf 删除所有匹配的元素
+
+批操作
+        coll1.removeAll(coll2) 将从coll1中删除coll2中出现的所有元素
+        coll1.retainAll(coll2)将从coll1中删除所有未在coll2中出现的元素
+
+集合和数组的转换
+        数组转换为集合 Arrays.asList包装器
+        HashSet&lt;String&gt; staff = new HashSet&lt;&gt;(Arrays.asList(values))
+        集合转换为数组 会更困难一些，可以是用toArray
+        Object[] values = staff.toArray();不过这样做的结果是一个对象数组，尽管你知道集合中包含一个特定类型的对象，但不能使用强制类型转换。toArray返回的数组是一个Object[]数组，不能改变类型
+        String[] values = staff.toArray(new String[0])
+        String[] values = staff.toArray(new String[staff.size()]) 指定大小数组
+</code></pre></li>
+</ul>
+
+    </article>
+    <!-- 前后页  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+                <div class="nextSlogan">Next Post</div>
+                <a href= "/2019/06/03/2019-06-03-Selenium2自动化测试实战/" title= Selenium 2 自动化测试实战 基于Python语言 >
+                    <div class="nextTitle">Selenium 2 自动化测试实战 基于Python语言</div>
+                </a>
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href= "/2019/05/29/2019-05-29-Head-First-SQL/" title= Head First SQL >
+                    <div class="prevTitle">Head First SQL</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
+    
+    
+<div id="container"></div>
+<link rel="stylesheet" href="https://oopstorm.github.io/gitment/style/default.css">
+<script src="https://oopstorm.github.io/gitment/dist/gitment.browser.js"></script>
+<script>
+    var gitment = new Gitment({
+        id: '2019/05/30',
+        owner: 'oopstorm',
+        admin: ['AlphaHinex', '2015lym'],
+        repo: 'oopstorm.github.io',
+        oauth: {
+            client_id: '97de8cf027f56d1c6816',
+            client_secret: '008570f35d326dd0237853d68dfd044a84f75af9',
+        },
+    })
+    gitment.render('container')
+</script>
+
+    <!--PC版-->
+
+    <!--PC版-->
+
+
+    
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+    
+        
+            
+                <a href="//github.com/oopstorm" class="iconfont-archer github" target="_blank" title=github></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- 不蒜子  -->
+    
+    <div class="busuanzi-container">
+        <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span>
+        </span>
+    </div>
+    
+</footer>
+    </div>
+    <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#java核心技术卷-基础知识-8-0"><span class="toc-number">1.</span> <span class="toc-text">java核心技术卷-基础知识 | 8.0</span></a></li></ol>
+    </div>
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-archive"> Total : 40 </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> 2019 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/31</span><a class="archive-post-title" href= "/2019/07/31/2019-07-31-java-performance/" >Java 性能权威指南</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/11</span><a class="archive-post-title" href= "/2019/06/11/2019-06-11-Selenium-IDE-构建自动化测试/" >Selenium IDE 构建自动化测试</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">06/03</span><a class="archive-post-title" href= "/2019/06/03/2019-06-03-Selenium2自动化测试实战/" >Selenium 2 自动化测试实战 基于Python语言</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/30</span><a class="archive-post-title" href= "/2019/05/30/2019-05-30-java核心技术卷-基础知识/" >java核心技术卷-基础知识</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/29</span><a class="archive-post-title" href= "/2019/05/29/2019-05-29-Head-First-SQL/" >Head First SQL</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/28</span><a class="archive-post-title" href= "/2019/05/28/2019-05-28-影响力/" >影响力</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/27</span><a class="archive-post-title" href= "/2019/05/27/2019-05-27-devops故障排除/" >devops故障排除</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/26</span><a class="archive-post-title" href= "/2019/05/26/2019-05-26-spring-cloud-microservice/" >Spring Cloud 微服务实战</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">03/27</span><a class="archive-post-title" href= "/2019/03/27/2019-03-27-how-tomcat-works/" >How Tomcat Works</a>
+        </li>
+    
+    
+    
+    
+    
+        </ul>
+    
+    <div class="archive-year"> 2018 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/31</span><a class="archive-post-title" href= "/2018/12/31/2018-12-31-把时间当作朋友/" >把时间当作朋友</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/30</span><a class="archive-post-title" href= "/2018/12/30/2018-12-30-beautiful-math/" >数学之美</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/05</span><a class="archive-post-title" href= "/2018/11/05/2018-11-05-tensorflow实战/" >Tensorflow：实战Google深度学习框架</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/29</span><a class="archive-post-title" href= "/2018/10/29/2018-10-29-When-Used-Mongo/" >什么时候用Mongo</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/25</span><a class="archive-post-title" href= "/2018/10/25/2018-10-25-用户调研及存储用户模型方法之分享篇/" >用户调研及存储用户模型之分享篇</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/20</span><a class="archive-post-title" href= "/2018/10/20/2018-10-20-markdownhere/" >如何将markdown格式无痛转成微信需要的富文本格式</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/19</span><a class="archive-post-title" href= "/2018/10/19/2018-10-19-UX（用户体验）思考方式/" >UX（用户体验）的思考方式</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/15</span><a class="archive-post-title" href= "/2018/10/15/2018-10-15-hackers-and-painters/" >黑客与画家</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/28</span><a class="archive-post-title" href= "/2018/09/28/2018-09-28-flowable-messageEventboundary/" >Flowable消息边界事件</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/27</span><a class="archive-post-title" href= "/2018/09/27/2018-09-27-mongoDB-rep/" >mongoDB4.0副本集讲解及配置</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/03</span><a class="archive-post-title" href= "/2018/09/03/2018-09-03-aboutface4/" >about face 4.0交互设计精髓</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/01</span><a class="archive-post-title" href= "/2018/09/01/2018-09-01-妙笔生花的秘密——商务写作新规则/" >妙笔生花的秘密——商务写作新规则</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/31</span><a class="archive-post-title" href= "/2018/08/31/2018-08-31-ci-need-to-build/" >git gradle持续集成按需构建</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">08/30</span><a class="archive-post-title" href= "/2018/08/30/2018-08-30-flowable-dataobject/" >Flowable DataObject的使用(flowable自定义流程标题)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/31</span><a class="archive-post-title" href= "/2018/07/31/2018-07-31-flowable-skip/" >Flowable SKIP</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/30</span><a class="archive-post-title" href= "/2018/07/30/2018-07-30-flowable-file-Interpretation/" >Flowable中的几个重要字段</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/29</span><a class="archive-post-title" href= "/2018/07/29/2018-07-29-java-8-in-action/" >Java 8 in Action</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/08</span><a class="archive-post-title" href= "/2018/07/08/2018-07-08-深入理解Java虚拟机/" >深入理解Java虚拟机:JVM高级特性与最佳实践(第2版)</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/06</span><a class="archive-post-title" href= "/2018/07/06/2018-07-06-Spring-in-Action/" >Spring in Action</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/05</span><a class="archive-post-title" href= "/2018/07/05/2018-07-05-NPDP/" >产品经理认证（NPDP）知识体系指南</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">07/04</span><a class="archive-post-title" href= "/2018/07/04/2018-07-04-在你身边，为你设计/" >在你身边，为你设计</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">05/15</span><a class="archive-post-title" href= "/2018/05/15/2018-05-15-liquibase-with-gradle/" >Using Liquibase with Gradle in Spring Project</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/10</span><a class="archive-post-title" href= "/2018/04/10/2018-04-10-clean-code/" >代码整洁之道</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/09</span><a class="archive-post-title" href= "/2018/04/09/2018-04-09-Spring4.x-enterprise-application-development-real-battle/" >Spring 4.X 企业应用开发实战</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/08</span><a class="archive-post-title" href= "/2018/04/08/2018-04-08-how-to-win-friends-and-influence-people/" >人性的弱点</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/07</span><a class="archive-post-title" href= "/2018/04/07/2018-04-07-everyone-is-a-pm/" >人人都是产品经理</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/06</span><a class="archive-post-title" href= "/2018/04/06/2018-04-06-the-elements-of-user-experience/" >用户体验要素</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/05</span><a class="archive-post-title" href= "/2018/04/05/2018-04-05-head-first-design-patterns/" >Head First Design Patterns</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/04</span><a class="archive-post-title" href= "/2018/04/04/2018-04-04-7-languages-in-7-weeks/" >七周其语言：理解多种编程泛型</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/03</span><a class="archive-post-title" href= "/2018/04/03/2018-04-03-http/" >图解 HTTP</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">04/02</span><a class="archive-post-title" href= "/2018/04/02/hello-world/" >Hello World</a>
+        </li>
+    
+    </div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="bookworms"><span class="iconfont-archer">&#xe606;</span>bookworms</span>
+    
+        <span class="sidebar-tag-name" data-tags="Liquibase"><span class="iconfont-archer">&#xe606;</span>Liquibase</span>
+    
+        <span class="sidebar-tag-name" data-tags="Spring"><span class="iconfont-archer">&#xe606;</span>Spring</span>
+    
+        <span class="sidebar-tag-name" data-tags="Gradle"><span class="iconfont-archer">&#xe606;</span>Gradle</span>
+    
+        <span class="sidebar-tag-name" data-tags="workflow"><span class="iconfont-archer">&#xe606;</span>workflow</span>
+    
+        <span class="sidebar-tag-name" data-tags="mongoDB"><span class="iconfont-archer">&#xe606;</span>mongoDB</span>
+    
+        <span class="sidebar-tag-name" data-tags="用户体验"><span class="iconfont-archer">&#xe606;</span>用户体验</span>
+    
+        <span class="sidebar-tag-name" data-tags="tools"><span class="iconfont-archer">&#xe606;</span>tools</span>
+    
+        <span class="sidebar-tag-name" data-tags="用户体验 产品设计"><span class="iconfont-archer">&#xe606;</span>用户体验 产品设计</span>
+    
+        <span class="sidebar-tag-name" data-tags="mongo"><span class="iconfont-archer">&#xe606;</span>mongo</span>
+    
+        <span class="sidebar-tag-name" data-tags="Tensorflow 深度学习"><span class="iconfont-archer">&#xe606;</span>Tensorflow 深度学习</span>
+    
+        <span class="sidebar-tag-name" data-tags="Selenium Selenium2 自动化测试"><span class="iconfont-archer">&#xe606;</span>Selenium Selenium2 自动化测试</span>
+    
+        <span class="sidebar-tag-name" data-tags="Selenium IDE 自动化测试"><span class="iconfont-archer">&#xe606;</span>Selenium IDE 自动化测试</span>
+    
+        <span class="sidebar-tag-name" data-tags="随笔"><span class="iconfont-archer">&#xe606;</span>随笔</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br/>
+    1、请确保node版本大于6.2<br/>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br/>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br/>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: '/',
+        author: 'John Doe'
+    }
+</script>
+    <!-- busuanzi  -->
+    
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
+    
+    </body>
+</html>
+
+
