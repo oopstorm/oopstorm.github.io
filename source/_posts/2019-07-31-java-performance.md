@@ -7,7 +7,7 @@ tags: bookworms
 
 ## Java 性能权威指南 | [8.1](https://book.douban.com/subject/26740520/)
 
-![cover](https://img1.doubanio.com/view/subject/l/public/s28487617.jpg)
+![cover](http://img3m3.ddimg.cn/34/36/23681923-1_u_1.jpg)
 
 软件运行性能是一个不可回避的问题。本书内容较新，包含 G1 回收器相关内容，对各种垃圾收集器的工作原理及调整方式都给出了较为详细的说明。同时还介绍了一些性能调优工具的用法，以便先定位问题，再进行针对性的解决。
 
